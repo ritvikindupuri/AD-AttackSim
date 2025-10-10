@@ -6,6 +6,8 @@ import RightPanel from './RightPanel';
 import NetworkGraph from './NetworkGraph';
 import { PlayIcon } from './Icons';
 import Loader from './Loader';
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+
 
 interface OperationViewProps {
   scenario: SimulationScenario;
@@ -60,13 +62,19 @@ const OperationView: React.FC<OperationViewProps> = ({ scenario }) => {
   const compromisedHostIds = activeStep.compromised_host_ids || [];
   const attackPath = scenario.steps.slice(0, activeStepIndex + 1).map(s => s.target_host_id);
 
+  // Parse the markdown description from the AI
+  const parsedDescription = marked.parse(scenario.description);
+
   return (
     <div className="space-y-6 animate-fade-in">
-        <div className="text-center p-4 bg-black/30 rounded-lg border border-green-500/20">
-            <h2 className="text-3xl font-bold text-white tracking-wider" style={{fontFamily: "'Exo 2', sans-serif"}}>
+        <div className="text-left p-6 bg-black/30 rounded-lg border border-green-500/20">
+            <h2 className="text-3xl font-bold text-white tracking-wider text-center" style={{fontFamily: "'Exo 2', sans-serif"}}>
                 {scenario.title}
             </h2>
-            <p className="text-gray-400 max-w-3xl mx-auto">{scenario.description}</p>
+             <div 
+                className="prose prose-invert prose-headings:text-green-400 prose-strong:text-white max-w-none mt-4 text-gray-400"
+                dangerouslySetInnerHTML={{ __html: parsedDescription as string }} 
+            />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">

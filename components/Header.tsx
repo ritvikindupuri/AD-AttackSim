@@ -1,52 +1,45 @@
-import React, { useContext } from 'react';
-import { ADversaryLogo, LogoutIcon, SettingsIcon } from './Icons';
+import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { ADversaryLogo } from './Icons';
+import SettingsModal from './SettingsModal';
+import HistoryModal from './HistoryModal';
+import { ExportedScenario } from '../services/aiService';
 
 interface HeaderProps {
-  onSettingsClick: () => void;
+  onLoadScenario: (scenario: ExportedScenario) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onSettingsClick }) => {
-  const { logout } = useContext(AuthContext);
+const Header: React.FC<HeaderProps> = ({ onLoadScenario }) => {
+    const { logout } = useContext(AuthContext);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-  return (
-    <header 
-        className="bg-black/80 backdrop-blur-sm border-b border-green-500/20 sticky top-0 z-50 h-[80px] flex items-center"
-        style={{ fontFamily: "'Exo 2', sans-serif" }}
-    >
-      <div className="container mx-auto px-4 lg:px-8 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <ADversaryLogo className="h-12 w-12 text-green-500" />
-          <div>
-            <h1 className="text-4xl font-bold text-white tracking-widest">
-              ADversary
-            </h1>
-            <p className="text-sm text-green-300/80 -mt-1 tracking-wider font-medium">
-              ACTIVE DIRECTORY THREAT SIMULATION
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-3 text-sm font-semibold">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                </span>
-                <span className="text-gray-300">STATUS:</span>
-                <span className="text-green-300">OPERATIONAL</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <button onClick={onSettingsClick} className="text-gray-400 hover:text-white transition-colors" title="Settings">
-                <SettingsIcon className="w-6 h-6" />
-              </button>
-              <button onClick={logout} className="text-gray-400 hover:text-white transition-colors" title="Logout">
-                <LogoutIcon className="w-6 h-6" />
-              </button>
-            </div>
-        </div>
-      </div>
-    </header>
-  );
+    return (
+        <>
+            <header className="bg-zinc-900/50 border-b border-green-500/20 sticky top-0 z-40 backdrop-blur-sm">
+                <div className="container mx-auto flex items-center justify-between p-4">
+                    <div className="flex items-center gap-4">
+                        <ADversaryLogo className="h-12 w-12 text-green-500" />
+                        <div>
+                            <h1 className="text-2xl font-bold text-white tracking-widest" style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                                ADversary
+                            </h1>
+                            <p className="text-xs text-green-300/70 tracking-wider font-medium">
+                                ACTIVE DIRECTORY THREAT SIMULATION
+                            </p>
+                        </div>
+                    </div>
+                    <nav className="flex items-center gap-4">
+                        <button onClick={() => setIsHistoryOpen(true)} className="text-sm font-semibold text-gray-300 hover:text-green-400 transition-colors">History</button>
+                        <button onClick={() => setIsSettingsOpen(true)} className="text-sm font-semibold text-gray-300 hover:text-green-400 transition-colors">Settings</button>
+                        <button onClick={logout} className="text-sm font-semibold bg-red-600/50 hover:bg-red-600 border border-red-500/50 text-white py-2 px-4 rounded-md transition-all">Logout</button>
+                    </nav>
+                </div>
+            </header>
+            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+            <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} onLoadScenario={onLoadScenario} />
+        </>
+    );
 };
 
 export default Header;

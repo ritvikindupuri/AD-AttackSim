@@ -1,62 +1,52 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-// FIX: Initialize the GoogleGenAI client.
+// AI Client Initialization
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// Data structures for the simulation
-export interface Node {
-    id: string;
-    hostname: string;
-    ip_address: string;
-    type: 'Domain Controller' | 'File Server' | 'Workstation' | 'Web Server' | 'Database Server';
+// --- TypeScript Interfaces for Simulation Data ---
+
+export interface Command {
+  command: string;
+  language: 'powershell' | 'bash' | 'cmd';
 }
 
-export interface Edge {
-    source: string; // node id
-    target: string; // node id
+export interface NetworkNode {
+  id: string;
+  label: string;
+  type: 'Domain Controller' | 'Member Server' | 'Workstation' | 'Firewall' | 'Internet';
+  os: string;
+}
+
+export interface NetworkEdge {
+  from: string;
+  to: string;
 }
 
 export interface NetworkTopology {
-    nodes: Node[];
-    edges: Edge[];
-}
-
-export interface MitreInfo {
-    id: string;
-    name: string;
-}
-
-export interface AdversaryCommand {
-    description: string;
-    command: string;
-}
-
-export interface SystemAlert {
-    timestamp: string;
-    severity: 'Critical' | 'High' | 'Medium' | 'Low';
-    description: string;
+  nodes: NetworkNode[];
+  edges: NetworkEdge[];
 }
 
 export interface AttackStep {
-    title: string;
-    description: string;
-    target_host_id: string;
-    compromised_host_ids: string[];
-    security_posture: 'Secure' | 'Guarded' | 'Critical';
-    system_alerts: SystemAlert[];
-    mitre_tactic: MitreInfo;
-    mitre_technique: MitreInfo;
-    adversary_commands: AdversaryCommand[];
-    defense_recommendations: string[];
+  step: number;
+  title: string;
+  description: string;
+  target_host_id: string;
+  commands: Command[];
+  mitre_tactics: string[];
+  mitre_techniques: string[];
+  system_alerts: string[];
+  defense_recommendations: string[];
+  compromised_host_ids: string[];
+  security_posture: 'Secure' | 'Guarded' | 'Critical';
 }
 
 export interface SimulationScenario {
-    title: string;
-    description: string;
-    network_topology: NetworkTopology;
-    steps: AttackStep[];
+  title: string;
+  description: string; // Markdown supported
+  network_topology: NetworkTopology;
+  steps: AttackStep[];
 }
-
 
 export interface ScenarioUserInput {
     environment: string;
@@ -70,170 +60,140 @@ export interface ExportedScenario {
 }
 
 
-// Define the response schema for the AI model
+// --- Gemini API Schema Definition ---
+
+const commandSchema = {
+    type: Type.OBJECT,
+    properties: {
+        command: { type: Type.STRING, description: "The exact command executed by the attacker." },
+        language: { type: Type.STRING, description: "The shell language of the command, e.g., 'powershell', 'cmd', 'bash'." },
+    },
+    required: ["command", "language"],
+};
+
+const nodeSchema = {
+    type: Type.OBJECT,
+    properties: {
+        id: { type: Type.STRING, description: "A short, unique identifier for the host, e.g., 'DC01', 'FIN-WS01'." },
+        label: { type: Type.STRING, description: "A descriptive label for the node, e.g., 'Primary Domain Controller'." },
+        type: { type: Type.STRING, description: "The role of the host: 'Domain Controller', 'Member Server', 'Workstation', 'Firewall', 'Internet'." },
+        os: { type: Type.STRING, description: "The operating system of the host, e.g., 'Windows Server 2022'." },
+    },
+    required: ["id", "label", "type", "os"],
+};
+
+const edgeSchema = {
+    type: Type.OBJECT,
+    properties: {
+        from: { type: Type.STRING, description: "The ID of the source node for the connection." },
+        to: { type: Type.STRING, description: "The ID of the target node for the connection." },
+    },
+    required: ["from", "to"],
+};
+
+const attackStepSchema = {
+    type: Type.OBJECT,
+    properties: {
+        step: { type: Type.INTEGER, description: "The sequential number of this attack step, starting from 1." },
+        title: { type: Type.STRING, description: "A concise title for the attack step, e.g., 'Initial Compromise via Phishing'." },
+        description: { type: Type.STRING, description: "A clear, high-level description of what the attacker is doing in this step." },
+        target_host_id: { type: Type.STRING, description: "The ID of the primary host being targeted in this step." },
+        commands: { type: Type.ARRAY, items: commandSchema, description: "An array of commands executed in this step." },
+        mitre_tactics: { type: Type.ARRAY, items: { type: Type.STRING }, description: "A list of relevant MITRE ATT&CK Tactic names, e.g., 'Execution'." },
+        mitre_techniques: { type: Type.ARRAY, items: { type: Type.STRING }, description: "A list of relevant MITRE ATT&CK Technique names, e.g., 'PowerShell'." },
+        system_alerts: { type: Type.ARRAY, items: { type: Type.STRING }, description: "A list of SIEM alerts or system events that this activity would realistically generate." },
+        defense_recommendations: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Actionable recommendations for defenders to detect or prevent this step." },
+        compromised_host_ids: { type: Type.ARRAY, items: { type: Type.STRING }, description: "A cumulative list of all host IDs that have been compromised up to and including this step." },
+        security_posture: { type: Type.STRING, description: "The overall security posture of the environment after this step: 'Secure', 'Guarded', or 'Critical'." },
+    },
+    required: ["step", "title", "description", "target_host_id", "commands", "mitre_tactics", "mitre_techniques", "system_alerts", "defense_recommendations", "compromised_host_ids", "security_posture"],
+};
+
 const scenarioSchema = {
     type: Type.OBJECT,
     properties: {
-        title: { type: Type.STRING },
-        description: { type: Type.STRING },
+        title: { type: Type.STRING, description: "An engaging and descriptive title for the entire simulation scenario." },
+        description: { type: Type.STRING, description: "An executive summary of the scenario in Markdown format. Describe the attacker's goal, the target environment, and the overall narrative." },
         network_topology: {
             type: Type.OBJECT,
             properties: {
-                nodes: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            id: { type: Type.STRING },
-                            hostname: { type: Type.STRING },
-                            ip_address: { type: Type.STRING },
-                            type: { type: Type.STRING },
-                        },
-                        required: ['id', 'hostname', 'ip_address', 'type']
-                    }
-                },
-                edges: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            source: { type: Type.STRING },
-                            target: { type: Type.STRING },
-                        },
-                        required: ['source', 'target']
-                    }
-                },
+                nodes: { type: Type.ARRAY, items: nodeSchema, description: "All nodes (computers, servers) present in the environment." },
+                edges: { type: Type.ARRAY, items: edgeSchema, description: "The network connections between the nodes." },
             },
-            required: ['nodes', 'edges']
+            required: ["nodes", "edges"],
         },
         steps: {
             type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    title: { type: Type.STRING },
-                    description: { type: Type.STRING },
-                    target_host_id: { type: Type.STRING },
-                    compromised_host_ids: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    security_posture: { type: Type.STRING },
-                    system_alerts: { 
-                        type: Type.ARRAY, 
-                        items: { 
-                            type: Type.OBJECT,
-                            properties: {
-                                timestamp: { type: Type.STRING },
-                                severity: { type: Type.STRING },
-                                description: { type: Type.STRING },
-                            },
-                            required: ['timestamp', 'severity', 'description']
-                        }
-                    },
-                    mitre_tactic: {
-                        type: Type.OBJECT,
-                        properties: { id: { type: Type.STRING }, name: { type: Type.STRING } },
-                        required: ['id', 'name']
-                    },
-                    mitre_technique: {
-                        type: Type.OBJECT,
-                        properties: { id: { type: Type.STRING }, name: { type: Type.STRING } },
-                        required: ['id', 'name']
-                    },
-                    adversary_commands: {
-                        type: Type.ARRAY,
-                        items: {
-                            type: Type.OBJECT,
-                            properties: {
-                                description: { type: Type.STRING },
-                                command: { type: Type.STRING },
-                            },
-                            required: ['description', 'command']
-                        }
-                    },
-                    defense_recommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
-                },
-                required: ['title', 'description', 'target_host_id', 'compromised_host_ids', 'security_posture', 'system_alerts', 'mitre_tactic', 'mitre_technique', 'adversary_commands', 'defense_recommendations']
-            }
+            items: attackStepSchema,
+            description: "A chronological, step-by-step breakdown of the attack sequence."
         },
     },
-    required: ['title', 'description', 'network_topology', 'steps']
+    required: ["title", "description", "network_topology", "steps"],
 };
 
+
+// --- Service Functions ---
 
 export const generateSimulationScenario = async (
-    environmentDescription: string,
-    attackType: string,
-    attackDirectives: string
+  environment: string, 
+  attackType: string, 
+  attackDirectives: string
 ): Promise<SimulationScenario> => {
-    const directivesSection = attackDirectives.trim() 
-        ? `
-    **Attack Directives:**
-    The user has provided the following specific directives. These are high-priority constraints or goals that MUST be incorporated to refine the primary attack vector.
-    \`\`\`
-    ${attackDirectives}
-    \`\`\`
-    `
-        : '';
+  const prompt = `
+    You are an expert cybersecurity red team operator and AI simulation engine named "ADversary". Your task is to generate a realistic, step-by-step Active Directory attack simulation based on user-defined parameters.
 
-    const prompt = `
-    Generate a realistic Active Directory attack simulation for "ADversary". The user's environment is provided in a structured YAML-like format. This configuration is the absolute and only source of truth for the environment's state.
-    You MUST parse this configuration and generate a scenario based *exclusively* on the provided details.
-    Do NOT invent or hallucinate any assets, configurations, or vulnerabilities not explicitly mentioned or logically implied by the user's input.
+    **Instructions:**
+    1.  **Analyze the Environment:** Carefully parse the provided YAML configuration to understand the network topology, hosts, and services. This is your source of truth.
+    2.  **Select Attack Path:** Design a logical and credible attack chain based on the primary attack vector: "${attackType}".
+    3.  **Incorporate Directives:** Adhere to any special instructions: "${attackDirectives || 'None'}".
+    4.  **Generate Narrative:** Create a compelling scenario with a clear attacker objective. The simulation must be educational, demonstrating real-world tactics.
+    5.  **Be Realistic:** All commands, tool outputs, and system alerts must be technically accurate for the specified OS and services.
+    6.  **Populate All Fields:** You MUST fully populate every field in the provided JSON schema. Do not leave any fields empty. The 'compromised_host_ids' array must be cumulative with each step.
 
-    - Primary Attack Vector: "${attackType}"
-    - User Environment Configuration:
+    **User-Defined Environment (YAML):**
     \`\`\`yaml
-    ${environmentDescription}
+    ${environment}
     \`\`\`
-    ${directivesSection}
-    The output must be a single, valid JSON object that strictly adheres to the provided schema.
 
-    **Core Directives:**
-    1.  **Strict Grounding:** Base the entire scenario ONLY on the user's YAML configuration. The network topology you generate must be a direct reflection of the assets defined by the user.
-    2.  **Network Topology:**
-        -   Use the hostnames, OS versions, and roles provided.
-        -   If IPs are provided, use them. If not, infer a realistic private IPv4 subnet (e.g., 10.0.0.0/24) that matches the scale of the environment and assign valid IPs to all nodes.
-        -   Ensure all IDs ('id', 'source', 'target', 'target_host_id') are consistent and valid within your generated topology.
-    3.  **Attack Steps (5-8 steps):**
-        -   Create a logical attack chain that is plausible within the user's defined security posture. For example, if an EDR is mentioned, the attacker's TTPs should attempt to evade or disable it.
-        -   'compromised_host_ids' must be cumulative.
-        -   **System Alerts:** Generate 2-4 structured SIEM alerts per step, reflecting the described security tools. Each alert must have a relative 'timestamp' ("T+0m 3s"), a 'severity', and a professional 'description'.
-    4.  **Realism:** All commands, descriptions, and recommendations must be professional and technically accurate.
-    `;
+    Now, generate the complete simulation scenario in the required JSON format.
+  `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: scenarioSchema,
-            },
-        });
-        
-        const jsonText = response.text.trim();
-        return JSON.parse(jsonText) as SimulationScenario;
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: scenarioSchema,
+      },
+    });
 
-    } catch (error) {
-        console.error("Error generating simulation scenario:", error);
-        throw new Error("Failed to generate simulation scenario from AI service. Please check the API key and network connection.");
-    }
+    const jsonText = response.text.trim();
+    return JSON.parse(jsonText) as SimulationScenario;
+  } catch (error) {
+    console.error("Error generating simulation scenario:", error);
+    throw new Error("Failed to generate the simulation scenario from the AI service. Please check your environment configuration and API key.");
+  }
 };
 
-export const getMitreExplanation = async (term: string, type: 'tactic' | 'technique'): Promise<string> => {
-    const prompt = `
-    Provide a professional, 3-5 sentence summary of the MITRE ATT&CK ${type}: "${term}". 
-    The summary should be suitable for a tooltip in a cybersecurity application, providing clear context for a security analyst.
-    `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        });
+export const getMitreExplanation = async (
+  term: string, 
+  type: 'tactic' | 'technique'
+): Promise<string> => {
+  const prompt = `
+    Provide a concise, one-sentence explanation for the following MITRE ATT&CK ${type}: "${term}". 
+    Focus on the high-level goal or action it represents.
+  `;
 
-        return response.text.trim();
-    } catch (error) {
-        console.error("Error getting MITRE explanation:", error);
-        throw new Error("Failed to get MITRE explanation.");
-    }
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+    return response.text.trim();
+  } catch (error) {
+    console.error(`Error getting MITRE explanation for ${term}:`, error);
+    return `Could not load explanation for ${term}.`;
+  }
 };

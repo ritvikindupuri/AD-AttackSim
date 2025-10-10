@@ -2,34 +2,26 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
-import Header from './components/Header';
 import DashboardPanel from './components/DashboardPanel';
-import SettingsModal from './components/SettingsModal';
+import { HistoryProvider } from './context/HistoryContext';
 
 const App: React.FC = () => {
   const { isAuthenticated } = useContext(AuthContext);
-  const [isSigningUp, setIsSigningUp] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(true);
 
   if (!isAuthenticated) {
-    return isSigningUp ? (
-      <SignUpPage onSwitchToLogin={() => setIsSigningUp(false)} />
-    ) : (
-      <LoginPage onSwitchToSignUp={() => setIsSigningUp(true)} />
-    );
+    if (showLogin) {
+      return <LoginPage onSwitchToSignUp={() => setShowLogin(false)} />;
+    } else {
+      return <SignUpPage onSwitchToLogin={() => setShowLogin(true)} />;
+    }
   }
 
   return (
-    <div className="bg-[#0c0c16] min-h-screen text-gray-200" style={{ fontFamily: "'Inter', sans-serif" }}>
-      <Header onSettingsClick={() => setIsSettingsOpen(true)} />
-      <main className="container mx-auto p-4 lg:p-8">
-        <DashboardPanel />
-      </main>
-      <SettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-      />
-    </div>
+    // FIX: Wrap DashboardPanel with HistoryProvider to make history context available.
+    <HistoryProvider>
+      <DashboardPanel />
+    </HistoryProvider>
   );
 };
 

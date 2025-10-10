@@ -1,123 +1,118 @@
 import React from 'react';
-import { NetworkTopology, Node as NodeType } from '../services/aiService';
-import { ShieldIcon, TerminalIcon, InfoIcon } from './Icons';
+import { NetworkTopology } from '../services/aiService';
 import Tooltip from './Tooltip';
-
-const ICONS: { [key: string]: React.ReactNode } = {
-    'Domain Controller': <ShieldIcon className="w-8 h-8 text-green-400" />,
-    'File Server': <InfoIcon className="w-8 h-8 text-cyan-400" />,
-    'Workstation': <TerminalIcon className="w-8 h-8 text-gray-400" />,
-    'Web Server': <TerminalIcon className="w-8 h-8 text-purple-400" />,
-    'Database Server': <InfoIcon className="w-8 h-8 text-amber-400" />,
-};
-
-interface NodeProps {
-    node: NodeType;
-    position: { x: number, y: number };
-    isTarget: boolean;
-    isCompromised: boolean;
-}
-
-const Node: React.FC<NodeProps> = ({ node, position, isTarget, isCompromised }) => {
-    const stateClasses = isCompromised 
-        ? 'bg-red-900/50 border-red-500' 
-        : isTarget 
-        ? 'bg-amber-900/50 border-amber-500 animate-pulse' 
-        : 'bg-gray-800/80 border-green-500/50 group-hover:bg-green-900/50 group-hover:border-green-400';
-    
-    const icon = ICONS[node.type] || <TerminalIcon className="w-8 h-8 text-gray-400" />;
-
-    return (
-        <div 
-            className="absolute flex flex-col items-center group transform -translate-x-1/2 -translate-y-1/2"
-            style={{ left: `${position.x}%`, top: `${position.y}%` }}
-        >
-            <Tooltip content={
-                <div className="text-left">
-                    <p className="font-bold">{node.hostname}</p>
-                    <p className="text-xs text-gray-400">{node.type}</p>
-                    <p className="text-xs font-mono">{node.ip_address}</p>
-                </div>
-            }>
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${stateClasses}`}>
-                    {icon}
-                </div>
-            </Tooltip>
-            <div className="text-center mt-1">
-                <p className="font-bold text-sm text-white truncate w-24">{node.hostname}</p>
-            </div>
-        </div>
-    );
-};
+import { DomainControllerIcon, ServerIcon, WorkstationIcon, FirewallIcon, CloudIcon } from './Icons';
 
 interface NetworkGraphProps {
-    topology: NetworkTopology;
-    targetHostId?: string;
-    compromisedHostIds: string[];
-    attackPath: string[];
+  topology: NetworkTopology;
+  targetHostId: string;
+  compromisedHostIds: string[];
+  attackPath: string[];
 }
 
+const getNodeColor = (type: string, isCompromised: boolean) => {
+  if (isCompromised) return 'bg-red-600 border-red-400';
+  switch (type) {
+    case 'Domain Controller': return 'bg-purple-600 border-purple-400';
+    case 'Member Server': return 'bg-blue-600 border-blue-400';
+    case 'Workstation': return 'bg-gray-600 border-gray-400';
+    case 'Firewall': return 'bg-green-700 border-green-500';
+    case 'Internet': return 'bg-sky-600 border-sky-400';
+    default: return 'bg-gray-700 border-gray-500';
+  }
+};
+
+const getNodeIcon = (type: string) => {
+    const iconProps = { className: "w-4 h-4 mr-2 flex-shrink-0" };
+    switch (type) {
+        case 'Domain Controller': return <DomainControllerIcon {...iconProps} />;
+        case 'Member Server': return <ServerIcon {...iconProps} />;
+        case 'Workstation': return <WorkstationIcon {...iconProps} />;
+        case 'Firewall': return <FirewallIcon {...iconProps} />;
+        case 'Internet': return <CloudIcon {...iconProps} />;
+        default: return null;
+    }
+};
+
+
 const NetworkGraph: React.FC<NetworkGraphProps> = ({ topology, targetHostId, compromisedHostIds, attackPath }) => {
-    const { nodes, edges } = topology;
-    const nodeCount = nodes.length;
-    const radius = 40; // Percentage of the container radius
-    const center = { x: 50, y: 50 };
+  const nodePositions = React.useMemo(() => {
+    const positions: { [key: string]: { x: number; y: number } } = {};
+    const tiers: { [key: string]: any[] } = {
+      'Internet': [], 'Firewall': [], 'Member Server': [], 'Domain Controller': [], 'Workstation': []
+    };
+    
+    topology.nodes.forEach(node => {
+      if (tiers[node.type]) {
+        tiers[node.type].push(node);
+      }
+    });
 
-    const nodePositions = nodes.reduce((acc, node, i) => {
-        const angle = (i / nodeCount) * 2 * Math.PI - Math.PI / 2; // Start from top
-        acc[node.id] = {
-            x: center.x + radius * Math.cos(angle),
-            y: center.y + radius * Math.sin(angle),
-        };
-        return acc;
-    }, {} as { [key: string]: { x: number; y: number } });
+    const tierOrder = ['Internet', 'Firewall', 'Member Server', 'Domain Controller', 'Workstation'];
+    let currentY = 10;
+    const tierGap = 80 / (tierOrder.filter(t => tiers[t].length > 0).length || 1);
 
-    const getNodePos = (id: string) => nodePositions[id] || { x: 0, y: 0 };
 
-    return (
-        <div className="bg-black/40 p-6 rounded-lg border border-green-500/20 backdrop-blur-sm h-[400px] overflow-hidden">
-            <h3 className="text-xl font-bold text-white mb-4" style={{ fontFamily: "'Exo 2', sans-serif" }}>Network Topology</h3>
-            <div className="relative w-full h-full">
-                <svg width="100%" height="100%" className="absolute inset-0">
-                    {edges.map((edge, i) => {
-                         const sourcePos = getNodePos(edge.source);
-                         const targetPos = getNodePos(edge.target);
-                         return (
-                            <line 
-                                key={i} 
-                                x1={`${sourcePos.x}%`} y1={`${sourcePos.y}%`}
-                                x2={`${targetPos.x}%`} y2={`${targetPos.y}%`}
-                                className="stroke-green-500/20" strokeWidth="2" 
-                            />
-                         );
-                    })}
-                     {attackPath.map((nodeId, i) => {
-                        if (i === 0) return null;
-                        const sourcePos = getNodePos(attackPath[i-1]);
-                        const targetPos = getNodePos(nodeId);
-                        return (
-                             <line 
-                                key={`attack-${i}`} 
-                                x1={`${sourcePos.x}%`} y1={`${sourcePos.y}%`}
-                                x2={`${targetPos.x}%`} y2={`${targetPos.y}%`}
-                                className="stroke-red-500/70" strokeWidth="3" 
-                            />
-                        );
-                     })}
-                </svg>
+    tierOrder.forEach(tierName => {
+      const nodesInTier = tiers[tierName];
+      if (nodesInTier.length > 0) {
+        const tierWidth = (nodesInTier.length - 1) * 18;
+        let currentX = 50 - tierWidth / 2;
+        nodesInTier.forEach(node => {
+          positions[node.id] = { x: currentX, y: currentY };
+          currentX += 18;
+        });
+        currentY += tierGap;
+      }
+    });
+    return positions;
+  }, [topology.nodes]);
 
-                {nodes.map(node => (
-                    <Node 
-                        key={node.id} 
-                        node={node}
-                        position={getNodePos(node.id)}
-                        isTarget={node.id === targetHostId}
-                        isCompromised={compromisedHostIds.includes(node.id)}
+  return (
+    <div className="bg-black/40 p-4 rounded-lg border border-green-500/20 backdrop-blur-sm h-[400px] relative overflow-hidden">
+        <h3 className="text-lg font-bold text-white mb-2" style={{fontFamily: "'Exo 2', sans-serif"}}>Network Topology</h3>
+        <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 0 }}>
+            {topology.edges.map((edge, index) => {
+                const fromNode = nodePositions[edge.from];
+                const toNode = nodePositions[edge.to];
+                if (!fromNode || !toNode) return null;
+
+                const isAttackPathEdge = attackPath.includes(edge.from) && attackPath.includes(edge.to) && Math.abs(attackPath.indexOf(edge.from) - attackPath.indexOf(edge.to)) === 1;
+
+                return (
+                    <line
+                        key={index}
+                        x1={`${fromNode.x}%`} y1={`${fromNode.y}%`}
+                        x2={`${toNode.x}%`} y2={`${toNode.y}%`}
+                        stroke={isAttackPathEdge ? '#f87171' : 'rgba(107, 114, 128, 0.5)'}
+                        strokeWidth={isAttackPathEdge ? 2 : 1.5}
+                        className="transition-all duration-500"
                     />
-                ))}
-            </div>
-        </div>
-    );
+                );
+            })}
+        </svg>
+
+        {topology.nodes.map(node => {
+            const pos = nodePositions[node.id];
+            if (!pos) return null;
+
+            const isCompromised = compromisedHostIds.includes(node.id);
+            const isTarget = node.id === targetHostId;
+
+            return (
+                <Tooltip key={node.id} content={<div className="text-xs p-1"><p className="font-bold">{node.label}</p><p>{node.os}</p></div>}>
+                    <div
+                        className={`absolute flex items-center justify-center px-3 py-2 rounded-md border-2 text-white text-xs font-bold transition-all duration-500 transform -translate-x-1/2 -translate-y-1/2 ${getNodeColor(node.type, isCompromised)} ${isTarget ? 'ring-4 ring-amber-400 scale-110' : ''}`}
+                        style={{ left: `${pos.x}%`, top: `${pos.y}%`, zIndex: 1, minWidth: '100px' }}
+                    >
+                        {getNodeIcon(node.type)}
+                        <span className="truncate">{node.label}</span>
+                    </div>
+                </Tooltip>
+            );
+        })}
+    </div>
+  );
 };
 
 export default NetworkGraph;

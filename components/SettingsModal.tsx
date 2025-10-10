@@ -1,4 +1,5 @@
 import React from 'react';
+import useLocalStorage from '../hooks/useLocalStorage';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -6,59 +7,80 @@ interface SettingsModalProps {
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
+  const [theme, setTheme] = useLocalStorage('adversary_theme', 'dark');
+  const [showTooltips, setShowTooltips] = useLocalStorage('adversary_tooltips', true);
 
-  const handleSave = () => {
-    onClose();
-  };
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div 
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in-fast"
       onClick={onClose}
     >
       <div 
-        className="bg-[#111111] border border-green-500/30 rounded-lg shadow-xl w-full max-w-md p-6"
+        className="bg-[#0c0c16] rounded-lg border border-green-500/30 shadow-2xl w-full max-w-lg mx-4 p-6 animate-slide-up-fast"
         onClick={(e) => e.stopPropagation()}
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
-        <h2 
-          className="text-2xl font-bold mb-6 text-green-400 tracking-wider text-center" 
-          style={{fontFamily: "'Exo 2', sans-serif"}}
-        >
-          Settings
-        </h2>
-        
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="ai-model" className="block text-sm font-medium text-gray-300 mb-2">
-              AI Model Provider
-            </label>
-            <select
-              id="ai-model"
-              value="gemini"
-              disabled
-              className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all text-sm disabled:opacity-70"
-            >
-              <option value="gemini">Google Gemini (gemini-2.5-flash)</option>
-            </select>
-             <p className="text-xs text-gray-500 mt-2">
-              The model provider is configured to use Google Gemini. The API key is sourced from the `API_KEY` environment variable.
-            </p>
-          </div>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "'Exo 2', sans-serif" }}>
+            Settings
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">&times;</button>
         </div>
         
-        <div className="mt-8 flex justify-end gap-4">
-          <button 
+        <div className="space-y-6 text-gray-300">
+          <div>
+            <label htmlFor="theme-select" className="block text-sm font-medium mb-2">
+              UI Theme
+            </label>
+            <select
+              id="theme-select"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all text-sm"
+              disabled // Acknowledge other themes aren't implemented
+            >
+              <option value="dark">ADversary Dark (Default)</option>
+              <option value="light" disabled>Light Mode (Coming Soon)</option>
+              <option value="matrix" disabled>Matrix Green (Coming Soon)</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <label htmlFor="tooltips-toggle" className="text-sm font-medium">
+              Enable Informational Tooltips
+            </label>
+            <button
+                role="switch"
+                aria-checked={showTooltips}
+                onClick={() => setShowTooltips(!showTooltips)}
+                className={`${
+                    showTooltips ? 'bg-green-600' : 'bg-gray-700'
+                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900`}
+            >
+                <span
+                    className={`${
+                    showTooltips ? 'translate-x-6' : 'translate-x-1'
+                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />
+            </button>
+          </div>
+
+          <div className="pt-4 border-t border-green-500/20 text-center">
+             <p className="text-xs text-gray-500">ADversary Simulation Engine v1.0.0</p>
+          </div>
+
+        </div>
+
+        <div className="mt-8 text-right">
+          <button
             onClick={onClose}
-            className="text-gray-300 hover:text-white font-bold py-2 px-4 rounded-lg transition-colors"
+            className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
           >
-            Cancel
-          </button>
-          <button 
-            onClick={handleSave}
-            className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg transition-all"
-          >
-            Save
+            Close
           </button>
         </div>
       </div>
