@@ -1,4 +1,3 @@
-
 # ADversary: Active Directory Threat Simulation
 
 ![ADversary Header](https://i.imgur.com/your-header-image.png) <!-- Placeholder: Replace with an actual screenshot of the app header -->
@@ -62,37 +61,67 @@ In the cybersecurity industry, there is no room for ambiguity or "fake" data. AD
 
 ## 🚀 Getting Started
 
-ADversary is a browser-based application that interacts directly with the Google Gemini API.
+Follow the instructions below to get ADversary up and running.
 
 ### Prerequisites
-- A modern web browser (Chrome, Firefox, Edge).
-- An active internet connection.
+-   A modern web browser (Chrome, Firefox, Edge).
+-   [Git](https://git-scm.com/) installed on your machine.
+-   A **Google Gemini API Key**. You can obtain one from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-### Installation & Setup
+### Local Development Setup (Complete Instructions)
 
-1.  **Clone the Repository:**
-    ```bash
-    git clone https://github.com/your-username/adversary.git
-    cd adversary
+These steps will guide you through running the application on your local machine.
+
+**Step 1: Clone the Repository**
+Open your terminal and clone the project files to your computer.
+```bash
+git clone https://github.com/your-username/adversary.git
+cd adversary
+```
+
+**Step 2: Configure Your API Key**
+The application needs your Google Gemini API key to function. For local development, you must add it directly to the `index.html` file.
+
+1.  Open the `index.html` file in a code editor.
+2.  Locate the `<script>` block at the bottom of the file.
+3.  Replace the placeholder text `'YOUR_GOOGLE_GEMINI_API_KEY_HERE'` with your actual API key.
+
+    ```html
+    <!-- ... inside index.html -->
+    <script>
+      window.process = {
+        env: {
+          API_KEY: 'YOUR_GOOGLE_GEMINI_API_KEY_HERE' // <-- PASTE YOUR KEY HERE
+        }
+      };
+    </script>
     ```
+    **Note:** This method is for local development only. Do not commit this file with your key to a public repository.
 
-2.  **Configure Environment Variables:**
-    This application requires a Google Gemini API key. In a real-world deployment environment (such as Google Cloud IDE, Vercel, Netlify, or a custom server), you must configure the following environment variable:
-    -   `API_KEY`: Your Google Gemini API key.
+**Step 3: Serve the Application**
+This is a pure client-side application. You can serve the project's root directory using any simple static file server.
 
-    The application is hardcoded to read `process.env.API_KEY` and will not function without it being set in the deployment environment.
-
-3.  **Serve the Application:**
-    Since this is a client-side application, you can serve the project's root directory using any simple static file server. For example, using Python's built-in server:
+-   **Using Python:**
     ```bash
     # For Python 3
     python -m http.server 8000
     ```
-    Or using `npx`:
+-   **Using Node.js (via npx):**
     ```bash
     npx serve .
     ```
 
-4.  **Access the Application:**
-    Open your web browser and navigate to `http://localhost:8000`. You will be greeted with the ADversary sign-in page. You can create a (simulated) account to begin using the platform.
+**Step 4: Access the Application**
+Open your web browser and navigate to the local address provided by your server (e.g., `http://localhost:8000`).
 
+You will be greeted with the ADversary sign-in page. You can create a new (simulated) account to begin using the platform.
+
+### Production Deployment
+
+For deploying ADversary to a live environment (like Vercel, Netlify, or a custom server), you should **not** hardcode the API key in `index.html`. Instead, you must use the platform's environment variable management system.
+
+1.  **Remove the Script Block:** Before deploying, remove or comment out the local development `<script>` block from `index.html`.
+2.  **Set Environment Variables:** In your hosting provider's settings, configure the following environment variable:
+    -   `API_KEY`: Set this to your Google Gemini API key.
+
+The application's code is built to read `process.env.API_KEY`, and most modern deployment platforms will automatically make this variable available to the application during their build process. This is the secure and standard way to handle secrets in production.

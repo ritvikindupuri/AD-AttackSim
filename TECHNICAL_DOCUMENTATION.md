@@ -13,7 +13,7 @@ The core philosophy is **stateful realism**. The application is architected arou
 
 The application follows a standard component-based architecture. A central `DashboardPanel` manages the top-level state, orchestrating user input via the `ControlPanel` and displaying results in the `SimulationView`. All interactions with the AI are funneled through a dedicated `aiService` module, which encapsulates the prompt engineering and API communication logic.
 
-### Mermaid Architecture Diagram
+### Application Architecture Diagram
 
 ```mermaid
 graph TD
@@ -49,7 +49,22 @@ graph TD
     style S fill:#004d40,stroke:#0f9d58,stroke-width:2px,color:#fff
 ```
 
-**Figure 1: Application Component Architecture.** This diagram illustrates the hierarchical relationship between the main React components. The `DashboardPanel` acts as the primary orchestrator, managing state and user interactions, while the `aiService` provides the core AI-driven data generation.
+**Figure 1: Application Component Architecture and Data Flow.**
+
+This diagram provides a high-level overview of the ADversary application's frontend architecture and its interaction with the AI service layer. It illustrates the hierarchical relationship between React components and the primary unidirectional data flow.
+
+-   **Authentication Layer:** The application entry point (`index.tsx`) renders the `App` component, which is wrapped by an `AuthProvider`. This context acts as a gatekeeper, rendering the `LoginPage` or `SignUpPage` if the user is not authenticated. Once a successful login occurs, it renders the main `DashboardPanel`.
+
+-   **Core Orchestrator (`DashboardPanel`):** This is the central hub of the authenticated application. It manages the primary state, including all user inputs from the `ControlPanel` (environment configuration, attack directives) and the main `SimulationScenario` object returned from the AI.
+
+-   **User Input and AI Interaction:** The user configures a scenario in the `ControlPanel`. When the "Start Simulation" button is clicked, the `DashboardPanel` initiates a call to the `aiService.ts` module. This service is the sole component responsible for all communication with the external Google Gemini API, encapsulating the complex prompt engineering and data validation logic.
+
+-   **Data Display and Simulation:** Once the `aiService` returns a valid `SimulationScenario` object, the `DashboardPanel` updates its state. This triggers a re-render of the `SimulationView` and its primary child, `OperationView`. The `OperationView` then orchestrates the entire active simulation, managing the step progression and passing down relevant slices of the scenario data to its specialized child components:
+    -   `NetworkGraph`: Visualizes the AI-generated network topology.
+    -   `ThreatIntelPanel`: Displays detailed information about the current attack step.
+    -   `RightPanel`: Contains the `SIEMDashboard` and other state panels, showing real-time, structured security alerts and system status.
+
+This architecture ensures a clear separation of concerns and a predictable, top-down data flow, making the application robust and maintainable.
 
 ---
 
