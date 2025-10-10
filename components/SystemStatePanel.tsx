@@ -1,48 +1,51 @@
 import React from 'react';
-import { AttackStep } from '../services/geminiService';
-import Tooltip from './Tooltip';
-import MitreExplanation from './MitreExplanation';
+import { InfoIcon } from './Icons';
+import { NetworkTopology } from '../services/aiService';
 
 interface SystemStatePanelProps {
-  currentStep: AttackStep | null;
-  totalCompromised: number;
+    topology: NetworkTopology;
+    compromisedHostIds: string[];
+    securityPosture: string;
 }
 
-const SystemStatePanel: React.FC<SystemStatePanelProps> = ({ currentStep, totalCompromised }) => {
-  return (
-    <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50">
-      <h3 className="text-lg font-bold text-white mb-3" style={{ fontFamily: "'Teko', sans-serif" }}>
-        System State
-      </h3>
-      {currentStep ? (
-        <div className="space-y-3 font-mono text-sm">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">Attacker Context:</span>
-            <span className="text-green-400 bg-green-900/30 px-2 py-0.5 rounded font-semibold">{currentStep.attacker_context}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">Current Tactic:</span>
-            <Tooltip
-                content={
-                    <MitreExplanation
-                        term={currentStep.mitre_attack.tactic}
-                        type="tactic"
-                    />
-                }
-            >
-                <span className="text-cyan-300 cursor-help">{currentStep.mitre_attack.tactic}</span>
-            </Tooltip>
-          </div>
-           <div className="flex justify-between items-center">
-            <span className="text-gray-400">Compromised Hosts:</span>
-            <span className="text-red-400 font-bold">{totalCompromised}</span>
-          </div>
+const SystemStatePanel: React.FC<SystemStatePanelProps> = ({ topology, compromisedHostIds, securityPosture }) => {
+    const totalNodes = topology.nodes.length;
+    const compromisedCount = compromisedHostIds.length;
+    
+    const dcNodes = topology.nodes.filter(n => n.type === 'Domain Controller');
+    const compromisedDCCount = dcNodes.filter(dc => compromisedHostIds.includes(dc.id)).length;
+
+    const getPostureColor = () => {
+        switch (securityPosture.toLowerCase()) {
+            case 'critical': return 'text-red-400';
+            case 'guarded': return 'text-amber-400';
+            case 'secure': return 'text-green-400';
+            default: return 'text-gray-300';
+        }
+    };
+
+    return (
+        <div className="bg-[#1a1a2e]/60 p-4 rounded-lg border border-purple-500/30 backdrop-blur-sm">
+            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2" style={{fontFamily: "'Exo 2', sans-serif"}}>
+                <InfoIcon className="w-5 h-5 text-purple-400" />
+                System State
+            </h3>
+            <div className="space-y-2 text-sm font-mono">
+                <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Security Posture:</span>
+                    <span className={`font-bold ${getPostureColor()}`}>{securityPosture}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Compromised Hosts:</span>
+                    <span className="font-bold text-red-400">{compromisedCount} / {totalNodes}</span>
+                </div>
+                 <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Compromised DCs:</span>
+                    <span className="font-bold text-red-400">{compromisedDCCount} / {dcNodes.length}</span>
+                </div>
+            </div>
         </div>
-      ) : (
-        <p className="text-gray-500 text-sm">Awaiting system state...</p>
-      )}
-    </div>
-  );
+    );
 };
 
 export default SystemStatePanel;

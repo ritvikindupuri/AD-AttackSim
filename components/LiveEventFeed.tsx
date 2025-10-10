@@ -1,60 +1,72 @@
-import React, { useRef, useEffect } from 'react';
-import { AttackStep } from '../services/geminiService';
-import { InfoIcon, TerminalIcon, WarningIcon } from './Icons';
+import React, { useState, useEffect } from 'react';
+import { AlertIcon, WarningIcon, TerminalIcon } from './Icons';
+import useTypewriter from '../hooks/useTypewriter';
 
-type Event = AttackStep['generated_events'][0];
-
-const SeverityIcon: React.FC<{severity: Event['severity']}> = ({ severity }) => {
-    switch (severity) {
-        case 'ALERT':
-            return <WarningIcon className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />;
-        case 'WARN':
-            return <InfoIcon className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />;
-        case 'INFO':
-        default:
-            return <TerminalIcon className="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0" />;
-    }
+interface LiveEventFeedProps {
+    alerts: string[];
 }
 
-const getSeverityColor = (severity: Event['severity']) => {
-    switch(severity) {
-        case 'ALERT': return 'text-red-300/90';
-        case 'WARN': return 'text-yellow-300/90';
-        case 'INFO': default: return 'text-cyan-300/90';
-    }
-}
-
-const LiveEventFeed: React.FC<{ events: Event[] }> = ({ events }) => {
-    const feedRef = useRef<HTMLDivElement>(null);
+const LiveEventFeed: React.FC<LiveEventFeedProps> = ({ alerts }) => {
+    const [displayedAlerts, setDisplayedAlerts] = useState<string[]>([]);
 
     useEffect(() => {
-        if (feedRef.current) {
-            feedRef.current.scrollTop = feedRef.current.scrollHeight;
-        }
-    }, [events]);
+        setDisplayedAlerts([]); // Clear on new alerts
+        
+        // FIX: Use `number` for setTimeout return type in browser environment instead of `NodeJS.Timeout`.
+        let timeoutIds: number[] = [];
+        alerts.forEach((alert, index) => {
+            const timeoutId = window.setTimeout(() => {
+                setDisplayedAlerts(prev => [...prev, alert]);
+            }, index * 1000); // Display alerts one by one
+            timeoutIds.push(timeoutId);
+        });
 
-  return (
-    <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50 h-[300px] flex flex-col">
-        <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2" style={{fontFamily: "'Teko', sans-serif"}}>
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-            </span>
-            Live Event Feed
-        </h3>
-        <div ref={feedRef} className="overflow-y-auto flex-grow pr-2 font-mono text-xs">
-            {events.length === 0 && <p className="text-gray-500">Awaiting operational events...</p>}
-            {events.map((event, index) => (
-                <div key={index} className="flex items-start gap-2 mb-2 animate-fade-in">
-                    <SeverityIcon severity={event.severity} />
-                    <p className={`flex-grow ${getSeverityColor(event.severity)}`}>
-                        {event.message}
-                    </p>
-                </div>
-            ))}
+        return () => {
+            timeoutIds.forEach(clearTimeout);
+        };
+    }, [alerts]);
+
+    const getIcon = (alertText: string) => {
+        const lowerText = alertText.toLowerCase();
+        if (lowerText.includes('critical') || lowerText.includes('compromise')) {
+            return <AlertIcon className="w-5 h-5 text-red-500 flex-shrink-0" />;
+        }
+        if (lowerText.includes('warning') || lowerText.includes('suspicious')) {
+            return <WarningIcon className="w-5 h-5 text-amber-400 flex-shrink-0" />;
+        }
+        return <TerminalIcon className="w-5 h-5 text-green-400 flex-shrink-0" />;
+    };
+
+    return (
+        <div className="bg-[#1a1a2e]/60 p-4 rounded-lg border border-purple-500/30 backdrop-blur-sm h-[250px] flex flex-col">
+            <h3 className="text-lg font-bold text-white mb-3" style={{fontFamily: "'Exo 2', sans-serif"}}>
+                Live Event Feed
+            </h3>
+            <div className="flex-grow overflow-y-auto space-y-2 pr-2">
+                {displayedAlerts.length === 0 && (
+                     <p className="text-sm text-gray-500 animate-pulse">Awaiting system events...</p>
+                )}
+                {displayedAlerts.map((alert, index) => (
+                    <Event key={index} text={alert} icon={getIcon(alert)} />
+                ))}
+            </div>
         </div>
-    </div>
-  );
+    );
+};
+
+interface EventProps {
+    text: string;
+    icon: React.ReactNode;
+}
+
+const Event: React.FC<EventProps> = ({ text, icon }) => {
+    const displayText = useTypewriter(text, 20);
+    return (
+        <div className="flex items-start gap-3 p-2 bg-black/20 rounded-md animate-fade-in-fast">
+            {icon}
+            <p className="text-sm text-gray-300 font-mono">{displayText}</p>
+        </div>
+    );
 };
 
 export default LiveEventFeed;

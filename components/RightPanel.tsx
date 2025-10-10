@@ -1,33 +1,25 @@
 import React from 'react';
-import { SimulationData, AttackStep } from '../services/geminiService';
-import LiveEventFeed from './LiveEventFeed';
-import NetworkGraph from './NetworkGraph';
+import { SimulationScenario } from '../services/aiService';
 import SystemStatePanel from './SystemStatePanel';
+import SIEMDashboard from './SIEMDashboard';
 
 interface RightPanelProps {
-  data: SimulationData | null;
-  currentStep: AttackStep | null;
-  compromisedHosts: Set<string>;
-  allEvents: AttackStep['generated_events'];
+  scenario: SimulationScenario;
+  activeStepIndex: number;
 }
 
-const RightPanel: React.FC<RightPanelProps> = ({ data, currentStep, compromisedHosts, allEvents }) => {
+const RightPanel: React.FC<RightPanelProps> = ({ scenario, activeStepIndex }) => {
+  const activeStep = scenario.steps[activeStepIndex];
+  const allAlerts = scenario.steps.slice(0, activeStepIndex + 1).flatMap(s => s.system_alerts);
+
   return (
-    <div className="flex flex-col gap-4 h-full">
-      {data && currentStep ? (
-        <>
-          <NetworkGraph data={data.network_graph} compromisedHosts={compromisedHosts} />
-          <SystemStatePanel currentStep={currentStep} totalCompromised={compromisedHosts.size} />
-          <LiveEventFeed events={allEvents} />
-        </>
-      ) : (
-        <div className="flex-grow flex items-center justify-center bg-black/30 rounded-md border border-cyan-500/20 p-4 shadow-inner-cyan h-full">
-          <div className="text-center text-gray-400">
-            <h3 className="text-2xl font-bold text-white mb-2" style={{fontFamily: "'Teko', sans-serif"}}>Awaiting Deployment</h3>
-            <p>Deploy a scenario to begin the operation.</p>
-          </div>
-        </div>
-      )}
+    <div className="space-y-6">
+      <SystemStatePanel 
+        topology={scenario.network_topology}
+        compromisedHostIds={activeStep.compromised_host_ids}
+        securityPosture={activeStep.security_posture}
+      />
+      <SIEMDashboard alerts={allAlerts} />
     </div>
   );
 };

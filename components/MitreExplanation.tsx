@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getMitreExplanation } from '../services/geminiService';
+// FIX: Corrected import path from non-existent geminiService.ts to aiService.ts
+import { getMitreExplanation } from '../services/aiService';
 import Loader from './Loader';
 
 interface MitreExplanationProps {

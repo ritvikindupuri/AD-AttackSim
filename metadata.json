@@ -1,5 +1,5 @@
 {
-  "name": "Praetorian: AD Cyber Range",
-  "description": "An elite, military-grade cyber range for cybersecurity professionals. Execute complex Active Directory attack paths, analyze TTPs, and master defensive strategies in a live, operational environment.",
+  "name": "ADversary",
+  "description": "An advanced Active Directory threat simulation platform. Design and execute sophisticated attack scenarios in a dynamic, adaptive cyber range environment to test your defenses.",
   "requestFramePermissions": []
 }
