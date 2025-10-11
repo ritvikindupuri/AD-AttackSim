@@ -55,8 +55,8 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ topology, targetHostId, com
   }, [topology.nodes]);
 
   return (
-    <div className="bg-black/40 p-4 rounded-lg border border-green-500/20 backdrop-blur-sm h-[480px] relative overflow-hidden">
-        <h3 className="text-lg font-bold text-white mb-2" style={{fontFamily: "'Exo 2', sans-serif"}}>Network Topology</h3>
+    <div className="bg-black/40 p-4 pt-8 rounded-lg border border-green-500/20 backdrop-blur-sm h-[480px] relative overflow-hidden">
+        <h3 className="text-lg font-bold text-white mb-2 absolute top-4 left-4" style={{fontFamily: "'Exo 2', sans-serif"}}>Network Topology</h3>
         <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 0 }}>
             {topology.edges.map((edge, index) => {
                 const fromNode = nodePositions[edge.from];

@@ -3,13 +3,50 @@ import { AttackStep } from '../services/aiService';
 import { ShieldIcon, TerminalIcon } from './Icons';
 import CodeBlock from './CodeBlock';
 import TabbedPanel from './TabbedPanel';
-import MitreExplanation from './MitreExplanation';
 import DefensePanel from './DefensePanel';
-import Tooltip from './Tooltip';
 
 interface ThreatIntelPanelProps {
   step: AttackStep;
 }
+
+const MitreAttackPanel: React.FC<{ step: AttackStep }> = ({ step }) => {
+    // Helper to generate the correct MITRE ATT&CK link
+    const getMitreLink = (techniqueId: string) => {
+        const baseUrl = 'https://attack.mitre.org/techniques/';
+        const formattedId = techniqueId.replace('.', '/');
+        return `${baseUrl}${formattedId}`;
+    };
+
+    return (
+        <div className="p-2 space-y-4 text-sm text-gray-300 h-[264px] overflow-y-auto pr-2">
+            {step.mitre_tactics.map((tactic, index) => (
+                 <div key={index}>
+                    <h4 className="font-bold text-gray-200 mb-2 uppercase text-xs tracking-wider">Tactic: <span className="text-purple-300">{tactic}</span></h4>
+                    <div className="pl-4 border-l-2 border-purple-500/20 space-y-3">
+                        {step.mitre_techniques.map(tech => (
+                            <div key={tech.id}>
+                                <a 
+                                    href={getMitreLink(tech.id)} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="font-bold text-sky-300 hover:text-sky-200 hover:underline transition-colors"
+                                >
+                                    {tech.id}: {tech.name}
+                                </a>
+                                <ul className="list-disc list-inside pl-2 mt-1 text-gray-400 text-xs space-y-1">
+                                    {tech.description.map((desc, i) => (
+                                        <li key={i}>{desc}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 
 const ThreatIntelPanel: React.FC<ThreatIntelPanelProps> = ({ step }) => {
   return (
@@ -32,23 +69,7 @@ const ThreatIntelPanel: React.FC<ThreatIntelPanelProps> = ({ step }) => {
                     </div>
                 ),
                 "MITRE ATT&CK": (
-                     <div className="p-2 space-y-4 text-sm text-gray-300 h-[264px] overflow-y-auto pr-2">
-                        {step.mitre_tactics.map((tactic, index) => (
-                             <div key={index}>
-                                <h4 className="font-bold text-gray-200 mb-2 uppercase text-xs tracking-wider">Tactic: <Tooltip content={<MitreExplanation term={tactic} type="tactic" />}><span className="text-purple-300 underline decoration-dotted cursor-pointer">{tactic}</span></Tooltip></h4>
-                                <div className="pl-4 space-y-1">
-                                    {step.mitre_techniques.map(tech => (
-                                        <div key={tech} className="flex items-center">
-                                            <span className="text-sky-400 mr-2">&#9492;</span>
-                                            <Tooltip content={<MitreExplanation term={tech} type="technique" />}>
-                                                <span className="bg-sky-800/50 text-sky-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-sky-500/50 cursor-pointer">{tech}</span>
-                                            </Tooltip>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                     <MitreAttackPanel step={step} />
                 ),
                 "Defense": (
                     <DefensePanel recommendations={step.defense_recommendations} />
