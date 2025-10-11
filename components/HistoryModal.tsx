@@ -44,7 +44,10 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onLoadScen
               <div key={index} className="bg-zinc-900/70 p-3 rounded-md border border-green-500/20 flex justify-between items-center">
                 <div>
                   <p className="font-bold text-white">{item.scenarioData.title}</p>
-                  <p className="text-xs text-gray-400">Attack: {item.userInput.attackType}</p>
+                  <p className="text-xs text-gray-400">
+                    Attack: {item.userInput.attackType}
+                    {item.timestamp && ` | Saved: ${new Date(item.timestamp).toLocaleString()}`}
+                  </p>
                 </div>
                 <button
                   onClick={() => handleLoad(item)}

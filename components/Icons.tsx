@@ -46,7 +46,7 @@ export const ADversaryLogo: React.FC<IconProps> = (props) => (
 export const CogIcon: React.FC<IconProps> = (props) => (
     <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06-.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
     </svg>
 );
 
@@ -74,36 +74,59 @@ export const ExportIcon: React.FC<IconProps> = (props) => (
   </svg>
 );
 
-export const DomainControllerIcon: React.FC<IconProps> = (props) => (
-  <svg {...props} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-    <rect x="12" y="4" width="40" height="56" rx="4" fill="#3B82F6" />
-    <path d="M12 12H52" stroke="#BFDBFE" strokeWidth="4" strokeLinecap="round"/>
-    <path d="M12 52H52" stroke="#BFDBFE" strokeWidth="4" strokeLinecap="round"/>
-    <rect x="20" y="20" width="24" height="8" rx="2" fill="#1E40AF" />
-    <rect x="20" y="36" width="24" height="8" rx="2" fill="#1E40AF" />
-    <circle cx="24" cy="46" r="2" fill="#FBBF24" />
-    <circle cx="32" cy="46" r="2" fill="#A3E635" />
+export const TrashIcon: React.FC<IconProps> = (props) => (
+  <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
   </svg>
+);
+
+export const DomainControllerIcon: React.FC<IconProps> = (props) => (
+    <svg {...props} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        {/* Server Body - A solid, professional blue, matching the reference image */}
+        <path d="M16 8C16 5.79 17.79 4 20 4H44C46.21 4 48 5.79 48 8V60H16V8Z" fill="#002EA7"/>
+        
+        {/* White Bars on Server */}
+        <rect x="21" y="10" width="22" height="4" fill="#FFFFFF"/>
+        <rect x="21" y="52" width="22" height="4" fill="#FFFFFF"/>
+
+        {/* Triangle Overlay */}
+        <path d="M36 34 L 62 60 L 32 60 Z" fill="#002EA7" stroke="#FFFFFF" strokeWidth="2.5" strokeLinejoin="round"/>
+
+        {/* Hierarchy Diagram inside Triangle */}
+        <g fill="#FFFFFF" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round">
+            {/* Boxes */}
+            <rect x="45" y="42" width="6" height="5"/>
+            <rect x="38" y="53" width="6" height="5"/>
+            <rect x="52" y="53" width="6" height="5"/>
+            
+            {/* Connecting Lines */}
+            <line x1="48" y1="47" x2="48" y2="50"/>
+            <line x1="41" y1="50" x2="55" y2="50"/>
+            <line x1="41" y1="50" x2="41" y2="53"/>
+            <line x1="55" y1="50" x2="55" y2="53"/>
+        </g>
+    </svg>
 );
 
 export const ServerIcon: React.FC<IconProps> = (props) => (
   <svg {...props} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-    <rect x="12" y="12" width="40" height="40" rx="4" fill="#6B7280" />
-    <path d="M12 22H52" stroke="#D1D5DB" strokeWidth="4" strokeLinecap="round"/>
-    <path d="M12 42H52" stroke="#D1D5DB" strokeWidth="4" strokeLinecap="round"/>
-    <circle cx="20" cy="32" r="3" fill="#A3E635" />
-    <rect x="28" y="29" width="16" height="6" rx="2" fill="#374151" />
+    <rect x="14" y="8" width="36" height="48" rx="2" fill="#6B7280" stroke="#374151" strokeWidth="2" />
+    <path d="M20 16h24" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round"/>
+    <path d="M20 24h24" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round"/>
+    <path d="M20 32h24" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round"/>
+    <rect x="20" y="44" width="8" height="4" rx="1" fill="#374151" />
+    <circle cx="40" cy="46" r="1.5" fill="#A3E635"/>
   </svg>
 );
 
 export const WorkstationIcon: React.FC<IconProps> = (props) => (
-  <svg {...props} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-    <rect x="4" y="12" width="56" height="36" rx="4" fill="#3B82F6" />
-    <rect x="10" y="18" width="44" height="24" fill="#000000" />
-    <path d="M24 48L40 48" stroke="#9CA3AF" strokeWidth="4" strokeLinecap="round" />
-    <path d="M32 48L32 56" stroke="#9CA3AF" strokeWidth="4" strokeLinecap="round" />
-    <path d="M20 56H44" stroke="#9CA3AF" strokeWidth="4" strokeLinecap="round" />
-  </svg>
+    <svg {...props} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="10" width="56" height="34" rx="4" fill="#3B82F6" stroke="#1E40AF" strokeWidth="2" />
+        <rect x="8" y="14" width="48" height="26" fill="#000" />
+        <path d="M20 44h24" stroke="#9CA3AF" strokeWidth="4" strokeLinecap="round" />
+        <path d="M32 44v10" stroke="#9CA3AF" strokeWidth="4" strokeLinecap="round" />
+        <path d="M24 54h16" stroke="#9CA3AF" strokeWidth="4" strokeLinecap="round" />
+    </svg>
 );
 
 export const FirewallIcon: React.FC<IconProps> = (props) => (

@@ -25,7 +25,7 @@ const DashboardPanel: React.FC = () => {
     try {
       const result = await generateSimulationScenario(environment, attackType, attackDirectives);
       setScenario(result);
-      // FIX: Add generated scenario to history
+      // Add generated scenario to history
       addScenarioToHistory({
         userInput: { environment, attackType, attackDirectives },
         scenarioData: result,
@@ -45,9 +45,12 @@ const DashboardPanel: React.FC = () => {
     setError(null);
   };
 
+  const handleClearScenario = useCallback(() => {
+    setScenario(null);
+  }, []);
+
   return (
     <div className="min-h-screen bg-zinc-900 text-white selection:bg-green-800 selection:text-white">
-      {/* FIX: Pass onLoadScenario handler to Header for HistoryModal */}
       <Header onLoadScenario={onLoadScenario} />
       <main className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         <ControlPanel
@@ -62,6 +65,7 @@ const DashboardPanel: React.FC = () => {
           onGenerate={handleGenerate}
           onLoadScenario={onLoadScenario}
           setError={setError}
+          onClear={handleClearScenario}
         />
         {error && (
             <div className="p-4 bg-red-900/50 border border-red-500/60 rounded-lg text-red-300 text-center">

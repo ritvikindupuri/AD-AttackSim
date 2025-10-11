@@ -40,12 +40,16 @@ In the cybersecurity industry, there is no room for ambiguity or "fake" data. AD
 - **Severity Analysis:** Events are automatically categorized by severity (Critical, Warning, Info) and color-coded for at-a-glance analysis.
 - **Realistic Interface:** The event log mimics the look and feel of a real security analysis tool, providing an immersive experience.
 
-### 5. In-Depth Threat Intelligence & MITRE ATT&CK® Mapping
+### 5. Forensic-Level PowerShell Logging
+- **Detailed Event Data:** For every relevant command, the AI generates a corresponding PowerShell Script Block Log (Event ID 4104), a critical artifact for defenders.
+- **Realistic Analysis:** These logs are presented in a dedicated "PowerShell Events" tab, mimicking the view a security analyst would have when investigating an incident, complete with user context, hostname, and the full script block text.
+
+### 6. In-Depth Threat Intelligence & MITRE ATT&CK® Mapping
 - **Detailed Step Analysis:** Each step in the attack provides a clear title, description, and the specific adversary commands being executed.
 - **Rich MITRE Tooltips:** Every tactic and technique is mapped to the MITRE ATT&CK® framework in a clear, hierarchical view. Hover over any TTP to view a professional, AI-generated summary of its purpose.
 - **Actionable Defense Recommendations:** For every attack step, the AI provides a list of concrete defense and mitigation strategies.
 
-### 6. Full Scenario Portability
+### 7. Full Scenario Portability
 - **Import/Export Functionality:** Save a complete simulation—your inputs and all AI-generated data—to a single JSON file.
 - **Share & Collaborate:** Share exported scenarios with team members to review, analyze, or re-run the exact same training exercise, ensuring consistency and enabling collaboration.
 

@@ -4,6 +4,7 @@ import { ShieldIcon, TerminalIcon } from './Icons';
 import CodeBlock from './CodeBlock';
 import TabbedPanel from './TabbedPanel';
 import DefensePanel from './DefensePanel';
+import PowerShellLogViewer from './PowerShellLogViewer';
 
 interface ThreatIntelPanelProps {
   step: AttackStep;
@@ -49,35 +50,41 @@ const MitreAttackPanel: React.FC<{ step: AttackStep }> = ({ step }) => {
 
 
 const ThreatIntelPanel: React.FC<ThreatIntelPanelProps> = ({ step }) => {
-  return (
-    <div className="bg-black/40 p-4 rounded-lg border border-green-500/20 backdrop-blur-sm">
-        <div className="px-2">
-             <h3 className="text-xl font-bold text-white mb-1" style={{fontFamily: "'Exo 2', sans-serif"}}>{step.title}</h3>
-             <p className="text-sm text-gray-400 mb-4">{step.description}</p>
+    const tabs: { [key: string]: React.ReactNode } = {
+        "Attacker Shell": (
+            <div className="p-2 h-[264px] overflow-y-auto">
+                <h4 className="flex items-center gap-2 text-sm font-bold text-gray-300 mb-2">
+                   <TerminalIcon className="w-5 h-5 text-green-400"/> 
+                   <span>Executed Commands on <span className="text-green-300">{step.target_host_id}</span></span>
+                </h4>
+                {step.commands.map((cmd, index) => (
+                    <CodeBlock key={index} code={cmd.command} language={cmd.language} />
+                ))}
+            </div>
+        ),
+        "MITRE ATT&CK": (
+             <MitreAttackPanel step={step} />
+        ),
+    };
+
+    // Dynamically add the PowerShell logs tab if data exists
+    if (step.powershell_logs && step.powershell_logs.length > 0) {
+        tabs["PowerShell Events"] = <PowerShellLogViewer logs={step.powershell_logs} />;
+    }
+
+    tabs["Defense"] = <DefensePanel recommendations={step.defense_recommendations} />;
+
+    return (
+        <div className="bg-black/40 p-4 rounded-lg border border-green-500/20 backdrop-blur-sm">
+            <div className="px-2">
+                 <h3 className="text-xl font-bold text-white mb-1" style={{fontFamily: "'Exo 2', sans-serif"}}>{step.title}</h3>
+                 <p className="text-sm text-gray-400 mb-4">{step.description}</p>
+            </div>
+            <TabbedPanel>
+                {tabs}
+            </TabbedPanel>
         </div>
-        <TabbedPanel>
-            {{
-                "Attacker Shell": (
-                    <div className="p-2 h-[264px] overflow-y-auto">
-                        <h4 className="flex items-center gap-2 text-sm font-bold text-gray-300 mb-2">
-                           <TerminalIcon className="w-5 h-5 text-green-400"/> 
-                           <span>Executed Commands on <span className="text-green-300">{step.target_host_id}</span></span>
-                        </h4>
-                        {step.commands.map((cmd, index) => (
-                            <CodeBlock key={index} code={cmd.command} language={cmd.language} />
-                        ))}
-                    </div>
-                ),
-                "MITRE ATT&CK": (
-                     <MitreAttackPanel step={step} />
-                ),
-                "Defense": (
-                    <DefensePanel recommendations={step.defense_recommendations} />
-                )
-            }}
-        </TabbedPanel>
-    </div>
-  );
+    );
 };
 
 export default ThreatIntelPanel;

@@ -72,7 +72,7 @@ const OperationView: React.FC<OperationViewProps> = ({ scenario }) => {
                 {scenario.title}
             </h2>
              <div 
-                className="prose prose-invert prose-headings:text-green-400 prose-strong:text-white max-w-none mt-4 text-gray-400"
+                className="prose prose-invert prose-p:leading-relaxed prose-headings:text-green-400 prose-strong:text-white max-w-none mt-4 text-gray-400"
                 dangerouslySetInnerHTML={{ __html: parsedDescription as string }} 
             />
         </div>

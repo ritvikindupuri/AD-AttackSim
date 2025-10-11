@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { SimulationScenario, ExportedScenario, ScenarioUserInput } from '../services/aiService';
-import { PlayIcon, CogIcon, ImportIcon, ExportIcon } from './Icons';
+import { PlayIcon, CogIcon, ImportIcon, ExportIcon, TrashIcon } from './Icons';
 import Loader from './Loader';
 
 interface ControlPanelProps {
@@ -19,6 +19,7 @@ interface ControlPanelProps {
     // Handlers
     onGenerate: () => void;
     onLoadScenario: (data: ExportedScenario) => void;
+    onClear: () => void;
     setError: (error: string | null) => void;
 }
 
@@ -42,7 +43,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     attackType, setAttackType,
     attackDirectives, setAttackDirectives,
     isLoading, scenario,
-    onGenerate, onLoadScenario, setError
+    onGenerate, onLoadScenario, onClear, setError
 }) => {
     
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,6 +60,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         const exportData: ExportedScenario = {
             userInput,
             scenarioData: scenario,
+            timestamp: new Date().toISOString()
         };
 
         const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -179,7 +181,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                             </>
                         )}
                     </button>
-                    <div className="flex items-center gap-4 mt-2">
+                    <div className="grid grid-cols-3 items-center gap-4 mt-2">
                          <button
                             onClick={handleImportClick}
                             disabled={isLoading}
@@ -195,6 +197,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                         >
                             <ExportIcon className="w-5 h-5" />
                             <span>Export</span>
+                        </button>
+                        <button
+                            onClick={onClear}
+                            disabled={isLoading || !scenario}
+                            className="w-full flex items-center justify-center gap-2 bg-red-800/80 hover:bg-red-700 disabled:bg-gray-800 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                        >
+                            <TrashIcon className="w-5 h-5" />
+                            <span>Clear</span>
                         </button>
                         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" className="hidden" />
                     </div>

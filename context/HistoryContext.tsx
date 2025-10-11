@@ -1,10 +1,10 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
-import { ExportedScenario } from '../services/aiService';
+import { ExportedScenario, ScenarioUserInput, SimulationScenario } from '../services/aiService';
 
 interface HistoryContextType {
   history: ExportedScenario[];
-  addScenarioToHistory: (scenario: ExportedScenario) => void;
+  addScenarioToHistory: (scenario: { userInput: ScenarioUserInput, scenarioData: SimulationScenario }) => void;
   clearHistory: () => void;
 }
 
@@ -13,9 +13,13 @@ const HistoryContext = createContext<HistoryContextType | undefined>(undefined);
 export const HistoryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [history, setHistory] = useLocalStorage<ExportedScenario[]>('adversary_history', []);
 
-  const addScenarioToHistory = (scenario: ExportedScenario) => {
+  const addScenarioToHistory = (scenario: { userInput: ScenarioUserInput, scenarioData: SimulationScenario }) => {
+    const scenarioWithTimestamp: ExportedScenario = {
+      ...scenario,
+      timestamp: new Date().toISOString(),
+    };
     // Avoid duplicates and limit history size
-    const newHistory = [scenario, ...history.filter(h => h.scenarioData.title !== scenario.scenarioData.title)].slice(0, 20);
+    const newHistory = [scenarioWithTimestamp, ...history.filter(h => h.scenarioData.title !== scenario.scenarioData.title)].slice(0, 20);
     setHistory(newHistory);
   };
 

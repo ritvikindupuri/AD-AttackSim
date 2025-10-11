@@ -88,6 +88,12 @@ This section details the purpose and functionality of each major component in th
     -   Implements the **automated simulation flow** using `useEffect` and `setTimeout`.
     -   Orchestrates the main two-column UI layout.
 
+### `ThreatIntelPanel.tsx`
+- **Role:** A tabbed interface providing detailed context for the current attack step.
+- **Functionality:**
+    -   Displays attacker commands, MITRE ATT&CK mappings, and defense recommendations.
+    -   **Dynamically renders a "PowerShell Events" tab** that uses the `PowerShellLogViewer` component to display detailed forensic logs (Event ID 4104) when they are available for the current step.
+
 ### `NetworkGraph.tsx`
 - **Role:** A dynamic, data-driven visualization of the simulation's network.
 - **Functionality:**
@@ -119,6 +125,7 @@ The core of ADversary's realism comes from its prompt engineering strategy. The 
 3.  **Schema Enforcement:** The AI is instructed to return a single, valid JSON object that strictly adheres to a provided schema.
     -   **For Gemini:** This is achieved using the `responseSchema` feature of the `@google/genai` SDK.
     -   **For OpenAI:** This is achieved using the `tools` and `tool_choice` parameters in the Chat Completions API.
+4.  **Generate Forensic Artifacts:** The prompt explicitly instructs the AI to generate realistic forensic artifacts. A key example is the requirement to produce a detailed PowerShell Script Block log (Event ID 4104) for every single PowerShell command executed in the simulation. This is reflected in the data schema with the addition of the `PowerShellLog` interface.
 
 ### `getMitreExplanation`
 This secondary function provides on-demand context for the UI. It sends a separate, targeted prompt to the selected AI to generate a concise, professional summary for a given MITRE ATT&CK® TTP.

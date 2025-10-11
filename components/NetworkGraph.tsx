@@ -20,7 +20,7 @@ const getNodeStyle = (isCompromised: boolean) => {
 };
 
 const getNodeIcon = (type: string) => {
-    const iconProps = { className: "w-9 h-9" }; // Sized to fit within the new circular nodes
+    const iconProps = { className: "w-10 h-10" }; // Sized to fit within the new circular nodes
     switch (type) {
         case 'Domain Controller': return <DomainControllerIcon {...iconProps} />;
         case 'Member Server': return <ServerIcon {...iconProps} />;
