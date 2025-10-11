@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { AlertIcon, WarningIcon, TerminalIcon } from './Icons';
 import { NetworkNode } from '../services/aiService';
 
-interface SOCEventViewerProps {
+interface AdversaryEventLogProps {
   alerts: string[];
   nodes: NetworkNode[];
 }
@@ -44,14 +44,14 @@ const parseSourceHost = (alertText: string, nodes: NetworkNode[]): string | null
     return null;
 }
 
-const SOCEventViewer: React.FC<SOCEventViewerProps> = ({ alerts, nodes }) => {
+const AdversaryEventLog: React.FC<AdversaryEventLogProps> = ({ alerts, nodes }) => {
   const reversedAlerts = [...alerts].reverse();
   const baseTimestamp = useMemo(() => new Date(), [alerts]); // Lock timestamp to the start of the current alert set
 
   return (
     <div className="bg-[#1a1a2e]/60 p-4 rounded-lg border border-purple-500/30 backdrop-blur-sm h-[300px] flex flex-col">
         <h3 className="text-lg font-bold text-white mb-3" style={{fontFamily: "'Exo 2', sans-serif"}}>
-            SOC Event Viewer
+            Adversary Event Log
         </h3>
         <div className="flex-grow overflow-y-auto space-y-2 pr-2 font-mono text-xs">
             {reversedAlerts.length === 0 ? (
@@ -87,4 +87,4 @@ const SOCEventViewer: React.FC<SOCEventViewerProps> = ({ alerts, nodes }) => {
   );
 };
 
-export default SOCEventViewer;
+export default AdversaryEventLog;

@@ -4,7 +4,7 @@
 
 **ADversary is a professional-grade, AI-powered cyber range designed for generating hyper-realistic Active Directory (AD) attack scenarios. It empowers cybersecurity professionals, red teams, and blue teams to test, validate, and enhance their defensive posture against sophisticated threats in a dynamic and controlled environment.**
 
-Unlike static training modules, ADversary leverages a state-of-the-art AI engine (Google Gemini) to craft unique, context-aware attack chains based *exclusively* on a user-defined environment. This strict "source-of-truth" methodology ensures that every simulation is a direct reflection of the provided network, making it an invaluable tool for practical, real-world security training and analysis.
+Unlike static training modules, ADversary leverages state-of-the-art AI engines (including Google Gemini and OpenAI GPT) to craft unique, context-aware attack chains based *exclusively* on a user-defined environment. This strict "source-of-truth" methodology ensures that every simulation is a direct reflection of the provided network, making it an invaluable tool for practical, real-world security training and analysis.
 
 ---
 
@@ -20,7 +20,8 @@ In the cybersecurity industry, there is no room for ambiguity or "fake" data. AD
 
 ## ✨ Key Features
 
-### 1. Structured, AI-Powered Scenario Generation
+### 1. Multi-Provider AI Scenario Generation
+- **Flexible AI Engine:** Choose between powerful AI providers like **Google Gemini** or **OpenAI GPT** to generate scenarios.
 - **Structured Configuration:** Define your target AD environment using a clear, YAML-like template. Specify domain controllers, servers, workstations, and the existing security posture (EDR, firewalls, policies).
 - **Grounded AI Engine:** The AI parses your configuration as a strict blueprint, ensuring every generated attack path is plausible and directly relevant to the environment you defined.
 - **Attack Directives:** Refine the AI's strategy with optional, high-priority directives. Instruct it to prioritize stealth, assume initial access on a specific host, or focus on a particular end-goal.
@@ -34,10 +35,10 @@ In the cybersecurity industry, there is no room for ambiguity or "fake" data. AD
 - **Live Network Mapping:** The AI generates a unique network map for each scenario, rendered in a professional, deterministic tiered layout to ensure clarity.
 - **Real-Time State Tracking:** The graph is not a static image. It dynamically highlights the current target host and visually marks all compromised systems in red as the attack unfolds.
 
-### 4. Professional SOC Event Viewer
+### 4. Adversary Event Log
 - **Rich, Structured Event Data:** The AI generates detailed, realistic security alerts for each attack step, complete with progressing timestamps and parsed source hostnames.
 - **Severity Analysis:** Events are automatically categorized by severity (Critical, Warning, Info) and color-coded for at-a-glance analysis.
-- **Realistic Interface:** The event viewer mimics the look and feel of a real Security Operations Center tool, providing an immersive experience for analysts.
+- **Realistic Interface:** The event log mimics the look and feel of a real security analysis tool, providing an immersive experience.
 
 ### 5. In-Depth Threat Intelligence & MITRE ATT&CK® Mapping
 - **Detailed Step Analysis:** Each step in the attack provides a clear title, description, and the specific adversary commands being executed.
@@ -53,7 +54,7 @@ In the cybersecurity industry, there is no room for ambiguity or "fake" data. AD
 ## 🛠️ Technology Stack
 
 -   **Frontend:** React, TypeScript, Tailwind CSS
--   **AI Engine:** Google Gemini (via `@google/genai` SDK)
+-   **AI Engines:** Google Gemini (via `@google/genai` SDK), OpenAI GPT (via REST API)
 -   **Authentication:** Simulated secure, backend-ready authentication flow (React Context)
 -   **Rendering:** Client-Side Rendering (CSR)
 
@@ -65,7 +66,9 @@ Follow the instructions below to get ADversary up and running.
 
 ### Prerequisites
 -   A modern web browser (Chrome, Firefox, Edge).
--   A **Google Gemini API Key**. You can obtain one from [Google AI Studio](https://aistudio.google.com/app/apikey).
+-   An API Key from your chosen provider:
+    -   **Google Gemini:** Obtain one from [Google AI Studio](https://aistudio.google.com/app/apikey).
+    -   **OpenAI:** Obtain one from the [OpenAI Platform](https://platform.openai.com/api-keys).
 
 ### Local Development Setup
 
@@ -89,10 +92,11 @@ Open your web browser and navigate to the local address provided by your server 
 
 1.  You will be greeted with the ADversary sign-in page. Create a new (simulated) account to begin.
 2.  Once logged in, click the **"Settings"** button in the top-right corner.
-3.  In the modal that appears, paste your **Google Gemini API Key** into the input field and click **"Save & Close"**.
+3.  In the modal that appears, **select your desired AI Provider** from the dropdown (e.g., "Google Gemini" or "OpenAI").
+4.  Paste your corresponding **API Key** into the input field and click **"Save & Close"**.
 
 The application is now configured and ready to use.
 
 ### Production Deployment
 
-For deploying ADversary to a live environment (like Vercel, Netlify, or a custom server), the process remains user-centric. There are no build steps or environment variables to configure for the API key. Users of your deployed instance will be prompted to enter their own API key in the settings, just as they would during local development. This ensures that your production deployment does not need to manage or secure any API credentials itself.
+For deploying ADversary to a live environment (like Vercel, Netlify, or a custom server), the process remains user-centric. There are no build steps or environment variables to configure for API keys. Users of your deployed instance will be prompted to enter their own API key in the settings, just as they would during local development. This ensures that your production deployment does not need to manage or secure any API credentials itself.

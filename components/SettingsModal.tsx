@@ -9,17 +9,22 @@ interface SettingsModalProps {
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const [theme, setTheme] = useLocalStorage('adversary_theme', 'dark');
   const [showTooltips, setShowTooltips] = useLocalStorage('adversary_tooltips', true);
-  const [apiKey, setApiKey] = useLocalStorage('adversary_api_key', '');
   
-  // Local state for the input field to avoid saving on every keystroke
-  const [localApiKey, setLocalApiKey] = useState(apiKey);
+  const [aiProvider, setAiProvider] = useLocalStorage('adversary_ai_provider', 'gemini');
+  const [geminiApiKey, setGeminiApiKey] = useLocalStorage('adversary_gemini_api_key', '');
+  const [openaiApiKey, setOpenaiApiKey] = useLocalStorage('adversary_openai_api_key', '');
+  
+  // Local state for the input fields to avoid saving on every keystroke
+  const [localGeminiKey, setLocalGeminiKey] = useState(geminiApiKey);
+  const [localOpenaiKey, setLocalOpenaiKey] = useState(openaiApiKey);
 
   if (!isOpen) {
     return null;
   }
 
   const handleSave = () => {
-    setApiKey(localApiKey);
+    setGeminiApiKey(localGeminiKey);
+    setOpenaiApiKey(localOpenaiKey);
     onClose();
   };
 
@@ -42,21 +47,52 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
         
         <div className="space-y-6 text-gray-300">
           <div>
-            <label htmlFor="api-key-input" className="block text-sm font-medium mb-2">
-              Gemini API Key
+            <label htmlFor="provider-select" className="block text-sm font-medium mb-2">
+              AI Provider
             </label>
-            <input
-              id="api-key-input"
-              type="password"
-              value={localApiKey}
-              onChange={(e) => setLocalApiKey(e.target.value)}
-              className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all placeholder-gray-500 text-sm"
-              placeholder="Enter your Google Gemini API key"
-            />
-            <p className="text-xs text-gray-500 mt-2">
+            <select
+                id="provider-select"
+                value={aiProvider}
+                onChange={(e) => setAiProvider(e.target.value)}
+                className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all text-sm"
+              >
+                <option value="gemini">Google Gemini</option>
+                <option value="openai">OpenAI GPT</option>
+            </select>
+          </div>
+
+          {aiProvider === 'gemini' ? (
+            <div>
+              <label htmlFor="gemini-api-key-input" className="block text-sm font-medium mb-2">
+                Gemini API Key
+              </label>
+              <input
+                id="gemini-api-key-input"
+                type="password"
+                value={localGeminiKey}
+                onChange={(e) => setLocalGeminiKey(e.target.value)}
+                className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all placeholder-gray-500 text-sm"
+                placeholder="Enter your Google Gemini API key"
+              />
+            </div>
+          ) : (
+            <div>
+              <label htmlFor="openai-api-key-input" className="block text-sm font-medium mb-2">
+                OpenAI API Key
+              </label>
+              <input
+                id="openai-api-key-input"
+                type="password"
+                value={localOpenaiKey}
+                onChange={(e) => setLocalOpenaiKey(e.target.value)}
+                className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all placeholder-gray-500 text-sm"
+                placeholder="Enter your OpenAI API key (e.g., sk-...)"
+              />
+            </div>
+          )}
+           <p className="text-xs text-gray-500 -mt-4">
               Your API key is stored securely in your browser's local storage and is never sent anywhere else.
             </p>
-          </div>
           
           <div className="pt-6 border-t border-green-500/20 space-y-6">
             <div>
