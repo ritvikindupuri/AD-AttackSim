@@ -4,7 +4,7 @@
 
 **ADversary is a professional-grade, AI-powered cyber range designed for generating hyper-realistic Active Directory (AD) attack scenarios. It empowers cybersecurity professionals, red teams, and blue teams to test, validate, and enhance their defensive posture against sophisticated threats in a dynamic and controlled environment.**
 
-Unlike static training modules, ADversary leverages state-of-the-art AI engines (including Google Gemini and OpenAI GPT) to craft unique, context-aware attack chains based *exclusively* on a user-defined environment. This strict "source-of-truth" methodology ensures that every simulation is a direct reflection of the provided network, making it an invaluable tool for practical, real-world security training and analysis.
+Unlike static training modules, ADversary leverages the state-of-the-art **Google Gemini** AI engine to craft unique, context-aware attack chains based *exclusively* on a user-defined environment. This strict "source-of-truth" methodology ensures that every simulation is a direct reflection of the provided network, making it an invaluable tool for practical, real-world security training and analysis.
 
 ---
 
@@ -20,8 +20,8 @@ In the cybersecurity industry, there is no room for ambiguity or "fake" data. AD
 
 ## ✨ Key Features
 
-### 1. Multi-Provider AI Scenario Generation
-- **Flexible AI Engine:** Choose between powerful AI providers like **Google Gemini** or **OpenAI GPT** to generate scenarios.
+### 1. Gemini-Powered AI Scenario Generation
+- **Optimized AI Engine:** Powered by **Google Gemini** for high-fidelity, structured, and reliable scenario creation.
 - **Structured Configuration:** Define your target AD environment using a clear, YAML-like template. Specify domain controllers, servers, workstations, and the existing security posture (EDR, firewalls, policies).
 - **Grounded AI Engine:** The AI parses your configuration as a strict blueprint, ensuring every generated attack path is plausible and directly relevant to the environment you defined.
 - **Attack Directives:** Refine the AI's strategy with optional, high-priority directives. Instruct it to prioritize stealth, assume initial access on a specific host, or focus on a particular end-goal.
@@ -58,7 +58,7 @@ In the cybersecurity industry, there is no room for ambiguity or "fake" data. AD
 ## 🛠️ Technology Stack
 
 -   **Frontend:** React, TypeScript, Tailwind CSS
--   **AI Engines:** Google Gemini (via `@google/genai` SDK), OpenAI GPT (via REST API)
+-   **AI Engine:** Google Gemini (via `@google/genai` SDK)
 -   **Authentication:** Simulated secure, backend-ready authentication flow (React Context)
 -   **Rendering:** Client-Side Rendering (CSR)
 
@@ -66,20 +66,20 @@ In the cybersecurity industry, there is no room for ambiguity or "fake" data. AD
 
 ## 🚀 Getting Started
 
-Follow the instructions below to get ADversary up and running.
+This application is designed to be run in an environment where the Google Gemini API key is pre-configured as an environment variable (`API_KEY`).
 
 ### Prerequisites
 -   A modern web browser (Chrome, Firefox, Edge).
--   An API Key from your chosen provider:
-    -   **Google Gemini:** Obtain one from [Google AI Studio](https://aistudio.google.com/app/apikey).
-    -   **OpenAI:** Obtain one from the [OpenAI Platform](https://platform.openai.com/api-keys).
+-   A Google Gemini API Key obtained from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-### Local Development Setup
+### Local Development / Deployment
+This is a pure client-side application that reads the API key from its hosting environment.
 
-This is a pure client-side application. You can serve the project's root directory using any simple static file server.
+**Step 1: Configure the API Key**
+The application is hardcoded to look for the API key in `process.env.API_KEY`. You must ensure this variable is available in the environment where you serve the application. How you do this depends on your hosting platform (e.g., setting secrets in Vercel/Netlify, or using a `.env` file with a local development server that supports it).
 
-**Step 1: Serve the Application**
-If you have the project files locally, open your terminal in the project's root directory and use a simple server.
+**Step 2: Serve the Application**
+If you have the project files locally, open your terminal in the project's root directory and use a simple static file server.
 
 -   **Using Python:**
     ```bash
@@ -91,16 +91,10 @@ If you have the project files locally, open your terminal in the project's root 
     npx serve .
     ```
 
-**Step 2: Access and Configure the Application**
+**Step 3: Access the Application**
 Open your web browser and navigate to the local address provided by your server (e.g., `http://localhost:8000`).
 
 1.  You will be greeted with the ADversary sign-in page. Create a new (simulated) account to begin.
-2.  Once logged in, click the **"Settings"** button in the top-right corner.
-3.  In the modal that appears, **select your desired AI Provider** from the dropdown (e.g., "Google Gemini" or "OpenAI").
-4.  Paste your corresponding **API Key** into the input field and click **"Save & Close"**.
+2.  Once logged in, the application is ready to use. The AI provider is automatically set to Google Gemini.
 
-The application is now configured and ready to use.
-
-### Production Deployment
-
-For deploying ADversary to a live environment (like Vercel, Netlify, or a custom server), the process remains user-centric. There are no build steps or environment variables to configure for API keys. Users of your deployed instance will be prompted to enter their own API key in the settings, just as they would during local development. This ensures that your production deployment does not need to manage or secure any API credentials itself.
+The application is now configured and ready to generate simulations.

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
 
 interface SettingsModalProps {
@@ -9,29 +9,15 @@ interface SettingsModalProps {
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const [theme, setTheme] = useLocalStorage('adversary_theme', 'dark');
   const [showTooltips, setShowTooltips] = useLocalStorage('adversary_tooltips', true);
-  
-  const [aiProvider, setAiProvider] = useLocalStorage('adversary_ai_provider', 'gemini');
-  const [geminiApiKey, setGeminiApiKey] = useLocalStorage('adversary_gemini_api_key', '');
-  const [openaiApiKey, setOpenaiApiKey] = useLocalStorage('adversary_openai_api_key', '');
-  
-  // Local state for the input fields to avoid saving on every keystroke
-  const [localGeminiKey, setLocalGeminiKey] = useState(geminiApiKey);
-  const [localOpenaiKey, setLocalOpenaiKey] = useState(openaiApiKey);
 
   if (!isOpen) {
     return null;
   }
 
-  const handleSave = () => {
-    setGeminiApiKey(localGeminiKey);
-    setOpenaiApiKey(localOpenaiKey);
-    onClose();
-  };
-
   return (
     <div 
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in-fast"
-      onClick={handleSave}
+      onClick={onClose}
     >
       <div 
         className="bg-[#0c0c16] rounded-lg border border-green-500/30 shadow-2xl w-full max-w-lg mx-4 p-6 animate-slide-up-fast"
@@ -42,57 +28,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
           <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "'Exo 2', sans-serif" }}>
             Settings
           </h2>
-          <button onClick={handleSave} className="text-gray-400 hover:text-white transition-colors">&times;</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">&times;</button>
         </div>
         
         <div className="space-y-6 text-gray-300">
           <div>
-            <label htmlFor="provider-select" className="block text-sm font-medium mb-2">
-              AI Provider
-            </label>
-            <select
-                id="provider-select"
-                value={aiProvider}
-                onChange={(e) => setAiProvider(e.target.value)}
-                className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all text-sm"
-              >
-                <option value="gemini">Google Gemini</option>
-                <option value="openai">OpenAI GPT</option>
-            </select>
-          </div>
-
-          {aiProvider === 'gemini' ? (
-            <div>
-              <label htmlFor="gemini-api-key-input" className="block text-sm font-medium mb-2">
-                Gemini API Key
-              </label>
-              <input
-                id="gemini-api-key-input"
-                type="password"
-                value={localGeminiKey}
-                onChange={(e) => setLocalGeminiKey(e.target.value)}
-                className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all placeholder-gray-500 text-sm"
-                placeholder="Enter your Google Gemini API key"
-              />
+            <p className="text-sm font-medium mb-2 text-gray-300">AI Provider</p>
+            <div className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 text-sm text-gray-400">
+              Google Gemini (Default)
             </div>
-          ) : (
-            <div>
-              <label htmlFor="openai-api-key-input" className="block text-sm font-medium mb-2">
-                OpenAI API Key
-              </label>
-              <input
-                id="openai-api-key-input"
-                type="password"
-                value={localOpenaiKey}
-                onChange={(e) => setLocalOpenaiKey(e.target.value)}
-                className="w-full bg-zinc-900/70 border border-green-500/30 rounded-md p-3 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all placeholder-gray-500 text-sm"
-                placeholder="Enter your OpenAI API key (e.g., sk-...)"
-              />
-            </div>
-          )}
-           <p className="text-xs text-gray-500 -mt-4">
-              Your API key is stored securely in your browser's local storage and is never sent anywhere else.
+            <p className="text-xs text-gray-500 mt-2">
+              ADversary is optimized for Google Gemini. The application uses a pre-configured API key from its environment.
             </p>
+          </div>
           
           <div className="pt-6 border-t border-green-500/20 space-y-6">
             <div>
@@ -142,10 +90,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
         <div className="mt-8 text-right">
           <button
-            onClick={handleSave}
+            onClick={onClose}
             className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
           >
-            Save & Close
+            Close
           </button>
         </div>
       </div>
