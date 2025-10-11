@@ -13,7 +13,7 @@ Unlike static training modules, ADversary leverages a state-of-the-art AI engine
 In the cybersecurity industry, there is no room for ambiguity or "fake" data. ADversary was built on the principle that a simulation is only as valuable as it is realistic. To that end, the platform adheres to three core directives:
 
 1.  **User Input is the Source of Truth:** The AI is strictly forbidden from hallucinating or inventing assets. The entire simulation—every host, IP address, security tool, and vulnerability—is logically derived from the structured environment configuration provided by the user.
-2.  **Dynamic, Not Static:** Every element of the simulation is live and data-driven. The network topology, system state, and SIEM data are generated on-the-fly and evolve in real-time as the attack progresses. There is no mock data.
+2.  **Dynamic, Not Static:** Every element of the simulation is live and data-driven. The network topology, system state, and security event logs are generated on-the-fly and evolve in real-time as the attack progresses. There is no mock data.
 3.  **Professional-Grade Tooling:** The user interface and features are designed to mirror the workflow and analytical tools used by security professionals, providing an immersive and contextually relevant experience.
 
 ---
@@ -31,17 +31,17 @@ In the cybersecurity industry, there is no room for ambiguity or "fake" data. AD
 - **Interactive Attack Path:** The "Attack Path" panel tracks every step. Click on any previous step to pause the simulation and instantly review the complete state of the operation at that moment in time.
 
 ### 3. Dynamic Network Topology Visualization
-- **Live Network Mapping:** The AI generates a unique network map for each scenario, including realistic hostnames, roles, and a consistent private IPv4 subnet.
+- **Live Network Mapping:** The AI generates a unique network map for each scenario, rendered in a professional, deterministic tiered layout to ensure clarity.
 - **Real-Time State Tracking:** The graph is not a static image. It dynamically highlights the current target host and visually marks all compromised systems in red as the attack unfolds.
 
-### 4. Professional SIEM Dashboard
-- **Rich, Structured Event Data:** The AI generates detailed, realistic SIEM alerts for each attack step, complete with timestamps, severity levels, and descriptions.
-- **Severity Analysis:** An at-a-glance dashboard provides a real-time count of events categorized by severity (Critical, High, Medium, Low).
-- **Interactive Filtering & Search:** Instantly filter the event log by severity or use the live search bar to query the entire event stream for specific keywords, hostnames, or IPs, mirroring the workflow of a real SOC analyst.
+### 4. Professional SOC Event Viewer
+- **Rich, Structured Event Data:** The AI generates detailed, realistic security alerts for each attack step, complete with progressing timestamps and parsed source hostnames.
+- **Severity Analysis:** Events are automatically categorized by severity (Critical, Warning, Info) and color-coded for at-a-glance analysis.
+- **Realistic Interface:** The event viewer mimics the look and feel of a real Security Operations Center tool, providing an immersive experience for analysts.
 
 ### 5. In-Depth Threat Intelligence & MITRE ATT&CK® Mapping
 - **Detailed Step Analysis:** Each step in the attack provides a clear title, description, and the specific adversary commands being executed.
-- **Rich MITRE Tooltips:** Every tactic and technique is mapped to the MITRE ATT&CK® framework. Hover over a TTP to view a professional, AI-generated summary of its operational purpose and context.
+- **Rich MITRE Tooltips:** Every tactic and technique is mapped to the MITRE ATT&CK® framework in a clear, hierarchical view. Hover over any TTP to view a professional, AI-generated summary of its purpose.
 - **Actionable Defense Recommendations:** For every attack step, the AI provides a list of concrete defense and mitigation strategies.
 
 ### 6. Full Scenario Portability
@@ -65,41 +65,14 @@ Follow the instructions below to get ADversary up and running.
 
 ### Prerequisites
 -   A modern web browser (Chrome, Firefox, Edge).
--   [Git](https://git-scm.com/) installed on your machine.
 -   A **Google Gemini API Key**. You can obtain one from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-### Local Development Setup (Complete Instructions)
+### Local Development Setup
 
-These steps will guide you through running the application on your local machine.
-
-**Step 1: Clone the Repository**
-Open your terminal and clone the project files to your computer.
-```bash
-git clone https://github.com/your-username/adversary.git
-cd adversary
-```
-
-**Step 2: Configure Your API Key**
-The application needs your Google Gemini API key to function. For local development, you must add it directly to the `index.html` file.
-
-1.  Open the `index.html` file in a code editor.
-2.  Locate the `<script>` block at the bottom of the file.
-3.  Replace the placeholder text `'YOUR_GOOGLE_GEMINI_API_KEY_HERE'` with your actual API key.
-
-    ```html
-    <!-- ... inside index.html -->
-    <script>
-      window.process = {
-        env: {
-          API_KEY: 'YOUR_GOOGLE_GEMINI_API_KEY_HERE' // <-- PASTE YOUR KEY HERE
-        }
-      };
-    </script>
-    ```
-    **Note:** This method is for local development only. Do not commit this file with your key to a public repository.
-
-**Step 3: Serve the Application**
 This is a pure client-side application. You can serve the project's root directory using any simple static file server.
+
+**Step 1: Serve the Application**
+If you have the project files locally, open your terminal in the project's root directory and use a simple server.
 
 -   **Using Python:**
     ```bash
@@ -111,17 +84,15 @@ This is a pure client-side application. You can serve the project's root directo
     npx serve .
     ```
 
-**Step 4: Access the Application**
+**Step 2: Access and Configure the Application**
 Open your web browser and navigate to the local address provided by your server (e.g., `http://localhost:8000`).
 
-You will be greeted with the ADversary sign-in page. You can create a new (simulated) account to begin using the platform.
+1.  You will be greeted with the ADversary sign-in page. Create a new (simulated) account to begin.
+2.  Once logged in, click the **"Settings"** button in the top-right corner.
+3.  In the modal that appears, paste your **Google Gemini API Key** into the input field and click **"Save & Close"**.
+
+The application is now configured and ready to use.
 
 ### Production Deployment
 
-For deploying ADversary to a live environment (like Vercel, Netlify, or a custom server), you should **not** hardcode the API key in `index.html`. Instead, you must use the platform's environment variable management system.
-
-1.  **Remove the Script Block:** Before deploying, remove or comment out the local development `<script>` block from `index.html`.
-2.  **Set Environment Variables:** In your hosting provider's settings, configure the following environment variable:
-    -   `API_KEY`: Set this to your Google Gemini API key.
-
-The application's code is built to read `process.env.API_KEY`, and most modern deployment platforms will automatically make this variable available to the application during their build process. This is the secure and standard way to handle secrets in production.
+For deploying ADversary to a live environment (like Vercel, Netlify, or a custom server), the process remains user-centric. There are no build steps or environment variables to configure for the API key. Users of your deployed instance will be prompted to enter their own API key in the settings, just as they would during local development. This ensures that your production deployment does not need to manage or secure any API credentials itself.

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AttackStep } from '../services/aiService';
-import { MitreIcon, ShieldIcon, TerminalIcon } from './Icons';
+import { ShieldIcon, TerminalIcon } from './Icons';
 import CodeBlock from './CodeBlock';
 import TabbedPanel from './TabbedPanel';
 import MitreExplanation from './MitreExplanation';
@@ -33,26 +33,21 @@ const ThreatIntelPanel: React.FC<ThreatIntelPanelProps> = ({ step }) => {
                 ),
                 "MITRE ATT&CK": (
                      <div className="p-2 space-y-4 text-sm text-gray-300 h-[264px] overflow-y-auto pr-2">
-                        <div>
-                            <h4 className="font-bold text-gray-200 mb-2">Tactics</h4>
-                            <div className="flex flex-wrap gap-2">
-                                {step.mitre_tactics.map(tactic => (
-                                    <Tooltip key={tactic} content={<MitreExplanation term={tactic} type="tactic" />}>
-                                        <span className="bg-purple-800/50 text-purple-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-purple-500/50 cursor-pointer">{tactic}</span>
-                                    </Tooltip>
-                                ))}
+                        {step.mitre_tactics.map((tactic, index) => (
+                             <div key={index}>
+                                <h4 className="font-bold text-gray-200 mb-2 uppercase text-xs tracking-wider">Tactic: <Tooltip content={<MitreExplanation term={tactic} type="tactic" />}><span className="text-purple-300 underline decoration-dotted cursor-pointer">{tactic}</span></Tooltip></h4>
+                                <div className="pl-4 space-y-1">
+                                    {step.mitre_techniques.map(tech => (
+                                        <div key={tech} className="flex items-center">
+                                            <span className="text-sky-400 mr-2">&#9492;</span>
+                                            <Tooltip content={<MitreExplanation term={tech} type="technique" />}>
+                                                <span className="bg-sky-800/50 text-sky-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-sky-500/50 cursor-pointer">{tech}</span>
+                                            </Tooltip>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                         <div>
-                            <h4 className="font-bold text-gray-200 mb-2">Techniques</h4>
-                            <div className="flex flex-wrap gap-2">
-                                {step.mitre_techniques.map(tech => (
-                                     <Tooltip key={tech} content={<MitreExplanation term={tech} type="technique" />}>
-                                        <span className="bg-sky-800/50 text-sky-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-sky-500/50 cursor-pointer">{tech}</span>
-                                     </Tooltip>
-                                ))}
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 ),
                 "Defense": (

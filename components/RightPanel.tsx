@@ -1,7 +1,7 @@
 import React from 'react';
 import { SimulationScenario } from '../services/aiService';
 import SystemStatePanel from './SystemStatePanel';
-import SIEMDashboard from './SIEMDashboard';
+import SOCEventViewer from './SIEMDashboard';
 
 interface RightPanelProps {
   scenario: SimulationScenario;
@@ -19,7 +19,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ scenario, activeStepIndex }) =>
         compromisedHostIds={activeStep.compromised_host_ids}
         securityPosture={activeStep.security_posture}
       />
-      <SIEMDashboard alerts={allAlerts} />
+      <SOCEventViewer alerts={allAlerts} nodes={scenario.network_topology.nodes} />
     </div>
   );
 };

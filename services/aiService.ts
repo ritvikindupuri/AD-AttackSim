@@ -1,7 +1,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-// AI Client Initialization
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// AI Client Initialization is now dynamic to use user-provided key.
+const getAiClient = () => {
+  // Safely parse the key from localStorage. It's stored as a JSON string.
+  const apiKey = JSON.parse(localStorage.getItem('adversary_api_key') || '""');
+  if (!apiKey) {
+    throw new Error("Gemini API key not found. Please set it in the application's settings.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
+
 
 // --- TypeScript Interfaces for Simulation Data ---
 
@@ -159,6 +167,7 @@ export const generateSimulationScenario = async (
   `;
 
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
@@ -170,9 +179,13 @@ export const generateSimulationScenario = async (
 
     const jsonText = response.text.trim();
     return JSON.parse(jsonText) as SimulationScenario;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating simulation scenario:", error);
-    throw new Error("Failed to generate the simulation scenario from the AI service. Please check your environment configuration and API key.");
+    // Provide a more user-friendly error message
+    const message = error.message.includes("API key not found") 
+        ? error.message
+        : "Failed to generate the simulation scenario from the AI service. Please check your environment configuration and ensure your API key is correct and valid.";
+    throw new Error(message);
   }
 };
 
@@ -187,6 +200,7 @@ export const getMitreExplanation = async (
   `;
 
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,

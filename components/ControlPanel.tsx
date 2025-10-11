@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { SimulationScenario, ExportedScenario, ScenarioUserInput } from '../services/aiService';
-import { PlayIcon, SparklesIcon, ImportIcon, ExportIcon } from './Icons';
+import { PlayIcon, CogIcon, ImportIcon, ExportIcon } from './Icons';
 import Loader from './Loader';
 
 interface ControlPanelProps {
@@ -113,7 +113,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 <div className="lg:col-span-2">
                     <label htmlFor="environment-desc" className="flex items-center gap-2 text-lg font-bold text-white mb-2" style={{ fontFamily: "'Exo 2', sans-serif" }}>
-                        <SparklesIcon className="w-6 h-6 text-green-400" />
+                        <CogIcon className="w-6 h-6 text-green-400" />
                         <span>Define Environment Configuration</span>
                     </label>
                     <p className="text-xs text-gray-400 mb-3">

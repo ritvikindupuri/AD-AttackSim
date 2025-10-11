@@ -1,4 +1,3 @@
-
 # ADversary: Technical Documentation
 
 ## 1. Introduction & Architectural Philosophy
@@ -34,7 +33,7 @@ graph TD
 
         K --> L[HistoryPanel];
         K --> M[SystemStatePanel];
-        K --> N[SIEMDashboard];
+        K --> N[SOCEventViewer];
         
         I --> O[MitreExplanation];
     end
@@ -62,7 +61,7 @@ This diagram provides a high-level overview of the ADversary application's front
 -   **Data Display and Simulation:** Once the `aiService` returns a valid `SimulationScenario` object, the `DashboardPanel` updates its state. This triggers a re-render of the `SimulationView` and its primary child, `OperationView`. The `OperationView` then orchestrates the entire active simulation, managing the step progression and passing down relevant slices of the scenario data to its specialized child components:
     -   `NetworkGraph`: Visualizes the AI-generated network topology.
     -   `ThreatIntelPanel`: Displays detailed information about the current attack step.
-    -   `RightPanel`: Contains the `SIEMDashboard` and other state panels, showing real-time, structured security alerts and system status.
+    -   `RightPanel`: Contains the `SOCEventViewer` and other state panels, showing real-time, structured security alerts and system status.
 
 This architecture ensures a clear separation of concerns and a predictable, top-down data flow, making the application robust and maintainable.
 
@@ -74,7 +73,7 @@ This section details the purpose and functionality of each major component in th
 
 ### `App.tsx`
 - **Role:** The root component of the authenticated application.
-- **Functionality:** Manages the authentication state provided by `AuthContext`. It acts as a router, displaying either the `LoginPage`/`SignUpPage` or the main `DashboardPanel` based on user authentication. It also manages the visibility of the `SettingsModal`.
+- **Functionality:** Manages the authentication state provided by `AuthContext`. It acts as a router, displaying either the `LoginPage`/`SignUpPage` or the main `DashboardPanel` based on user authentication.
 
 ### `DashboardPanel.tsx`
 - **Role:** The primary stateful component and orchestrator for the main application view.
@@ -87,7 +86,7 @@ This section details the purpose and functionality of each major component in th
 ### `ControlPanel.tsx`
 - **Role:** The user's primary interface for configuring and initiating a simulation.
 - **Functionality:**
-    -   Renders the structured YAML-like editor for the environment configuration.
+    -   Renders the structured YAML editor for the environment configuration.
     -   Provides the dropdown for selecting a primary attack vector and a textarea for optional attack directives.
     -   Manages the "Start Simulation," "Import," and "Export" buttons, triggering the corresponding handlers passed down from `DashboardPanel`.
     -   Displays a loading state when a simulation is being generated.
@@ -112,7 +111,7 @@ This section details the purpose and functionality of each major component in th
 - **Role:** A dynamic, data-driven visualization of the simulation's network.
 - **Functionality:**
     -   Receives the `network_topology`, `targetHostId`, `compromisedHostIds`, and `attackPath` as props.
-    -   Calculates node positions in a circular layout to prevent overflow and ensure a clean presentation.
+    -   Calculates node positions using a deterministic, tiered layout algorithm to ensure a clean, professional presentation.
     -   Renders nodes and edges using SVG and styled `div` elements.
     -   Applies conditional styling to visually distinguish target hosts, compromised hosts, and the attack path.
 
@@ -123,13 +122,12 @@ This section details the purpose and functionality of each major component in th
     -   Dynamically calculates and displays statistics (e.g., compromised hosts/DCs) based on the props. It contains no static data.
     -   Applies color-coding based on the AI-provided security posture (`Critical`, `Guarded`, etc.).
 
-### `SIEMDashboard.tsx`
+### `SOCEventViewer.tsx`
 - **Role:** A professional, interactive interface for analyzing security events.
 - **Functionality:**
     -   Receives the cumulative list of `system_alerts` for the current and all previous steps.
-    -   Manages local state for `filter` (by severity) and `searchQuery`.
-    -   Uses `useMemo` to efficiently calculate severity counts and the list of filtered alerts.
-    -   Provides a robust UI for filtering and searching, mimicking the functionality of real SIEM tools.
+    -   Enhances realism by adding simulated timestamps and parsing source hostnames from alert text.
+    -   Applies color-coding and icons based on alert severity.
 
 ---
 

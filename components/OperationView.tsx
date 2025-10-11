@@ -6,7 +6,7 @@ import RightPanel from './RightPanel';
 import NetworkGraph from './NetworkGraph';
 import { PlayIcon } from './Icons';
 import Loader from './Loader';
-import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+import { marked } from 'marked';
 
 
 interface OperationViewProps {

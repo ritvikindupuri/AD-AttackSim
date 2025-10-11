@@ -11,19 +11,19 @@ interface NetworkGraphProps {
 }
 
 const getNodeColor = (type: string, isCompromised: boolean) => {
-  if (isCompromised) return 'bg-red-600 border-red-400';
+  if (isCompromised) return 'bg-red-900/80 border-red-500';
   switch (type) {
-    case 'Domain Controller': return 'bg-purple-600 border-purple-400';
-    case 'Member Server': return 'bg-blue-600 border-blue-400';
-    case 'Workstation': return 'bg-gray-600 border-gray-400';
-    case 'Firewall': return 'bg-green-700 border-green-500';
-    case 'Internet': return 'bg-sky-600 border-sky-400';
-    default: return 'bg-gray-700 border-gray-500';
+    case 'Domain Controller': return 'bg-slate-800/80 border-blue-500/50';
+    case 'Member Server': return 'bg-slate-800/80 border-slate-500/50';
+    case 'Workstation': return 'bg-slate-800/80 border-sky-500/50';
+    case 'Firewall': return 'bg-slate-800/80 border-amber-500/50';
+    case 'Internet': return 'bg-slate-800/80 border-gray-500/50';
+    default: return 'bg-slate-900/80 border-slate-700/50';
   }
 };
 
 const getNodeIcon = (type: string) => {
-    const iconProps = { className: "w-4 h-4 mr-2 flex-shrink-0" };
+    const iconProps = { className: "w-8 h-8 mr-2 flex-shrink-0" }; // Increased icon size
     switch (type) {
         case 'Domain Controller': return <DomainControllerIcon {...iconProps} />;
         case 'Member Server': return <ServerIcon {...iconProps} />;
@@ -38,9 +38,9 @@ const getNodeIcon = (type: string) => {
 const NetworkGraph: React.FC<NetworkGraphProps> = ({ topology, targetHostId, compromisedHostIds, attackPath }) => {
   const nodePositions = React.useMemo(() => {
     const positions: { [key: string]: { x: number; y: number } } = {};
-    const tiers: { [key: string]: any[] } = {
-      'Internet': [], 'Firewall': [], 'Member Server': [], 'Domain Controller': [], 'Workstation': []
-    };
+    const tierOrder = ['Internet', 'Firewall', 'Member Server', 'Domain Controller', 'Workstation'];
+    const tiers: { [key: string]: any[] } = {};
+    tierOrder.forEach(t => tiers[t] = []); // Initialize all possible tiers
     
     topology.nodes.forEach(node => {
       if (tiers[node.type]) {
@@ -48,23 +48,25 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ topology, targetHostId, com
       }
     });
 
-    const tierOrder = ['Internet', 'Firewall', 'Member Server', 'Domain Controller', 'Workstation'];
-    let currentY = 10;
-    const tierGap = 80 / (tierOrder.filter(t => tiers[t].length > 0).length || 1);
+    const populatedTiers = tierOrder.filter(t => tiers[t].length > 0);
+    const totalTiers = populatedTiers.length;
+    const verticalGap = totalTiers > 1 ? 80 / (totalTiers - 1) : 0;
+    
+    let currentY = 15; // Start with some padding from the top
 
-
-    tierOrder.forEach(tierName => {
+    populatedTiers.forEach(tierName => {
       const nodesInTier = tiers[tierName];
-      if (nodesInTier.length > 0) {
-        const tierWidth = (nodesInTier.length - 1) * 18;
-        let currentX = 50 - tierWidth / 2;
-        nodesInTier.forEach(node => {
-          positions[node.id] = { x: currentX, y: currentY };
-          currentX += 18;
-        });
-        currentY += tierGap;
-      }
+      const totalNodesInTier = nodesInTier.length;
+      const horizontalGap = totalNodesInTier > 1 ? 80 / (totalNodesInTier - 1) : 0;
+      let currentX = 10; // Start with padding from the left
+      
+      nodesInTier.forEach(node => {
+        positions[node.id] = { x: currentX, y: currentY };
+        currentX += horizontalGap;
+      });
+      currentY += verticalGap;
     });
+
     return positions;
   }, [topology.nodes]);
 
@@ -102,8 +104,8 @@ const NetworkGraph: React.FC<NetworkGraphProps> = ({ topology, targetHostId, com
             return (
                 <Tooltip key={node.id} content={<div className="text-xs p-1"><p className="font-bold">{node.label}</p><p>{node.os}</p></div>}>
                     <div
-                        className={`absolute flex items-center justify-center px-3 py-2 rounded-md border-2 text-white text-xs font-bold transition-all duration-500 transform -translate-x-1/2 -translate-y-1/2 ${getNodeColor(node.type, isCompromised)} ${isTarget ? 'ring-4 ring-amber-400 scale-110' : ''}`}
-                        style={{ left: `${pos.x}%`, top: `${pos.y}%`, zIndex: 1, minWidth: '100px' }}
+                        className={`absolute flex items-center justify-center p-2 rounded-lg border text-white text-xs font-bold transition-all duration-500 transform -translate-x-1/2 -translate-y-1/2 ${getNodeColor(node.type, isCompromised)} ${isTarget ? 'ring-2 ring-amber-400 scale-110' : ''}`}
+                        style={{ left: `${pos.x}%`, top: `${pos.y}%`, zIndex: 1, minWidth: '140px', height: '48px' }}
                     >
                         {getNodeIcon(node.type)}
                         <span className="truncate">{node.label}</span>
