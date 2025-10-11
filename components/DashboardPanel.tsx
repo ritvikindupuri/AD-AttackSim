@@ -2,16 +2,23 @@ import React, { useState, useCallback } from 'react';
 import Header from './Header';
 import ControlPanel from './ControlPanel';
 import SimulationView from './SimulationView';
-import { generateSimulationScenario, SimulationScenario, ExportedScenario } from '../services/aiService';
+import { startInitialSimulation, generateNextAttackStep, SimulationScenario, ExportedScenario, AttackStep, NetworkTopology } from '../services/aiService';
 import { DEFAULT_ENVIRONMENT } from '../lib/defaults';
 import { useHistory } from '../context/HistoryContext';
+
+export interface ActiveSimulation {
+  title: string;
+  description: string;
+  network_topology: NetworkTopology;
+  steps: AttackStep[];
+}
 
 const DashboardPanel: React.FC = () => {
   const [environment, setEnvironment] = useState<string>(DEFAULT_ENVIRONMENT);
   const [attackType, setAttackType] = useState<string>('Kerberoasting');
   const [attackDirectives, setAttackDirectives] = useState<string>('');
   
-  const [scenario, setScenario] = useState<SimulationScenario | null>(null);
+  const [simulation, setSimulation] = useState<ActiveSimulation | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,34 +27,65 @@ const DashboardPanel: React.FC = () => {
   const handleGenerate = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    setScenario(null);
+    setSimulation(null);
 
     try {
-      const result = await generateSimulationScenario(environment, attackType, attackDirectives);
-      setScenario(result);
-      // Add generated scenario to history
-      addScenarioToHistory({
-        userInput: { environment, attackType, attackDirectives },
-        scenarioData: result,
+      const result = await startInitialSimulation(environment, attackType, attackDirectives);
+      setSimulation({
+        title: result.title,
+        description: result.description,
+        network_topology: result.network_topology,
+        steps: [result.first_step],
       });
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred.');
     } finally {
       setIsLoading(false);
     }
-  }, [environment, attackType, attackDirectives, addScenarioToHistory]);
+  }, [environment, attackType, attackDirectives]);
+  
+  const handleTakeAction = useCallback(async (action: string) => {
+      if (!simulation) return;
+      setIsLoading(true);
+      setError(null);
+      try {
+        const nextStep = await generateNextAttackStep(
+          simulation.steps,
+          action,
+          environment
+        );
+        setSimulation(prev => prev ? { ...prev, steps: [...prev.steps, nextStep] } : null);
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred.');
+      } finally {
+        setIsLoading(false);
+      }
+  }, [simulation, environment]);
 
   const onLoadScenario = (data: ExportedScenario) => {
     setEnvironment(data.userInput.environment);
     setAttackType(data.userInput.attackType);
     setAttackDirectives(data.userInput.attackDirectives);
-    setScenario(data.scenarioData);
+    setSimulation(data.scenarioData); // The loaded scenario is now the active simulation
     setError(null);
   };
 
   const handleClearScenario = useCallback(() => {
-    setScenario(null);
-  }, []);
+    if (simulation) {
+      // Save the completed interactive scenario to history before clearing
+      const scenarioToSave: SimulationScenario = {
+        title: simulation.title,
+        description: simulation.description,
+        network_topology: simulation.network_topology,
+        steps: simulation.steps,
+      };
+      addScenarioToHistory({
+        userInput: { environment, attackType, attackDirectives },
+        scenarioData: scenarioToSave,
+      });
+    }
+    setSimulation(null);
+  }, [simulation, addScenarioToHistory, environment, attackType, attackDirectives]);
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white selection:bg-green-800 selection:text-white">
@@ -61,7 +99,7 @@ const DashboardPanel: React.FC = () => {
           attackDirectives={attackDirectives}
           setAttackDirectives={setAttackDirectives}
           isLoading={isLoading}
-          scenario={scenario}
+          scenario={simulation}
           onGenerate={handleGenerate}
           onLoadScenario={onLoadScenario}
           setError={setError}
@@ -72,7 +110,11 @@ const DashboardPanel: React.FC = () => {
                 <strong>Error:</strong> {error}
             </div>
         )}
-        <SimulationView scenario={scenario} isLoading={isLoading} />
+        <SimulationView 
+          simulation={simulation} 
+          isLoading={isLoading}
+          onTakeAction={handleTakeAction} 
+        />
       </main>
       <footer className="text-center py-4 text-xs text-gray-600">
         ADversary Simulation Engine. For educational purposes only.

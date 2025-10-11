@@ -1,75 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { SimulationScenario } from '../services/aiService';
+import { ActiveSimulation } from './DashboardPanel';
 import ThreatIntelPanel from './ThreatIntelPanel';
 import HistoryPanel from './HistoryPanel';
 import RightPanel from './RightPanel';
 import NetworkGraph from './NetworkGraph';
-import { PlayIcon } from './Icons';
-import Loader from './Loader';
+import DefenseActionPanel from './DefenseActionPanel';
 import { marked } from 'marked';
 
 
 interface OperationViewProps {
-  scenario: SimulationScenario;
+  simulation: ActiveSimulation;
+  onTakeAction: (action: string) => void;
+  isLoadingAction: boolean;
 }
 
-const OperationView: React.FC<OperationViewProps> = ({ scenario }) => {
+const OperationView: React.FC<OperationViewProps> = ({ simulation, onTakeAction, isLoadingAction }) => {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
-  const [revealedSteps, setRevealedSteps] = useState<number[]>([0]);
-  const [isPlaying, setIsPlaying] = useState(true);
 
+  // When new steps are added to the simulation, automatically focus the view on the latest one.
   useEffect(() => {
-    setActiveStepIndex(0);
-    setRevealedSteps([0]);
-    setIsPlaying(true);
-  }, [scenario]);
-
-  useEffect(() => {
-    if (!isPlaying || activeStepIndex >= scenario.steps.length - 1) {
-      if (activeStepIndex >= scenario.steps.length - 1) setIsPlaying(false);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      handleNextStep();
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, [activeStepIndex, isPlaying, scenario.steps.length]);
-
-
-  const handleNextStep = () => {
-    if (activeStepIndex < scenario.steps.length - 1) {
-      const nextStep = activeStepIndex + 1;
-      setActiveStepIndex(nextStep);
-      if (!revealedSteps.includes(nextStep)) {
-        setRevealedSteps(prev => [...prev, nextStep].sort((a,b) => a-b));
-      }
-    } else {
-      setIsPlaying(false);
-    }
-  };
-
+    setActiveStepIndex(simulation.steps.length - 1);
+  }, [simulation.steps]);
+  
   const selectStep = (index: number) => {
-    if (revealedSteps.includes(index)) {
-      setActiveStepIndex(index);
-      setIsPlaying(false);
-    }
+    // User can always review previous steps
+    setActiveStepIndex(index);
   }
   
-  const activeStep = scenario.steps[activeStepIndex];
-  const isComplete = revealedSteps.length === scenario.steps.length && activeStepIndex === scenario.steps.length - 1;
-  const compromisedHostIds = activeStep.compromised_host_ids || [];
-  const attackPath = scenario.steps.slice(0, activeStepIndex + 1).map(s => s.target_host_id);
+  const activeStep = simulation.steps[activeStepIndex];
+  const isLastStep = activeStepIndex === simulation.steps.length - 1;
+
+  // The attack path shown on the graph should reflect all steps up to the currently viewed one.
+  const attackPath = simulation.steps.slice(0, activeStepIndex + 1).map(s => s.target_host_id);
 
   // Parse the markdown description from the AI
-  const parsedDescription = marked.parse(scenario.description);
+  const parsedDescription = marked.parse(simulation.description);
 
   return (
     <div className="space-y-6 animate-fade-in">
         <div className="text-left p-6 bg-black/30 rounded-lg border border-green-500/20">
             <h2 className="text-3xl font-bold text-white tracking-wider text-center" style={{fontFamily: "'Exo 2', sans-serif"}}>
-                {scenario.title}
+                {simulation.title}
             </h2>
              <div 
                 className="prose prose-invert prose-p:leading-relaxed prose-headings:text-green-400 prose-strong:text-white max-w-none mt-4 text-gray-400"
@@ -81,47 +52,31 @@ const OperationView: React.FC<OperationViewProps> = ({ scenario }) => {
             <div className="lg:w-2/3 flex-shrink-0 flex flex-col gap-6">
                 <ThreatIntelPanel step={activeStep} />
                 <NetworkGraph 
-                    topology={scenario.network_topology}
+                    topology={simulation.network_topology}
                     targetHostId={activeStep.target_host_id}
-                    compromisedHostIds={compromisedHostIds}
+                    compromisedHostIds={activeStep.compromised_host_ids || []}
                     attackPath={attackPath}
                 />
             </div>
             <div className="lg:w-1/3 flex-shrink-0 flex flex-col gap-6">
                 <HistoryPanel 
-                    steps={scenario.steps}
+                    steps={simulation.steps}
                     activeStepIndex={activeStepIndex}
                     setActiveStepIndex={selectStep}
-                    revealedSteps={revealedSteps}
+                    revealedSteps={[...Array(simulation.steps.length).keys()]} // All current steps are revealed
                 />
-                <RightPanel scenario={scenario} activeStepIndex={activeStepIndex} />
+                <RightPanel simulation={simulation} activeStepIndex={activeStepIndex} />
             </div>
         </div>
 
-        <div className="mt-6 flex justify-center">
-            {isComplete ? (
-                 <div className="w-full md:w-1/2 lg:w-1/3 text-center font-bold py-3 px-8 rounded-lg bg-green-500/20 text-green-300">
-                    Simulation Complete
-                </div>
-            ) : (
-                <button
-                    onClick={() => setIsPlaying(!isPlaying)}
-                    className="w-full md:w-1/2 lg:w-1/3 flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300"
-                >
-                    {isPlaying ? (
-                        <>
-                            <Loader size="h-5 w-5" />
-                            <span>AUTORUNNING... (PAUSE)</span>
-                        </>
-                    ) : (
-                        <>
-                            <PlayIcon className="w-5 h-5" />
-                            <span>RESUME AUTORUN</span>
-                        </>
-                    )}
-                </button>
-            )}
-        </div>
+        {/* The Defense Action Panel is only active when viewing the latest step */}
+        {isLastStep && (
+            <DefenseActionPanel 
+                choices={activeStep.defensive_choices}
+                onAction={onTakeAction}
+                isLoading={isLoadingAction}
+            />
+        )}
     </div>
   );
 };

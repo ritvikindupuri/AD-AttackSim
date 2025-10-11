@@ -1,15 +1,16 @@
 import React from 'react';
 import OperationView from './OperationView';
-import { SimulationScenario } from '../services/aiService';
 import { EmptyStateIcon } from './Icons';
+import { ActiveSimulation } from './DashboardPanel';
 
 interface SimulationViewProps {
-  scenario: SimulationScenario | null;
+  simulation: ActiveSimulation | null;
   isLoading: boolean;
+  onTakeAction: (action: string) => void;
 }
 
-const SimulationView: React.FC<SimulationViewProps> = ({ scenario, isLoading }) => {
-  if (isLoading) {
+const SimulationView: React.FC<SimulationViewProps> = ({ simulation, isLoading, onTakeAction }) => {
+  if (isLoading && !simulation) {
     return (
       <div className="text-center p-8 bg-black/20 rounded-lg border border-green-500/20">
         <h2 className="text-2xl font-bold text-green-400">Generating Attack Scenario...</h2>
@@ -18,7 +19,7 @@ const SimulationView: React.FC<SimulationViewProps> = ({ scenario, isLoading }) 
     );
   }
 
-  if (!scenario) {
+  if (!simulation) {
     return (
       <div className="text-center p-8 bg-black/20 rounded-lg border border-dashed border-green-500/30">
         <EmptyStateIcon className="w-12 h-12 mx-auto text-green-500/50 mb-4" />
@@ -28,7 +29,7 @@ const SimulationView: React.FC<SimulationViewProps> = ({ scenario, isLoading }) 
     );
   }
 
-  return <OperationView scenario={scenario} />;
+  return <OperationView simulation={simulation} onTakeAction={onTakeAction} isLoadingAction={isLoading} />;
 };
 
 export default SimulationView;

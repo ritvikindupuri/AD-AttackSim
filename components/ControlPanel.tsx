@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
-import { SimulationScenario, ExportedScenario, ScenarioUserInput } from '../services/aiService';
+import { ExportedScenario, ScenarioUserInput } from '../services/aiService';
 import { PlayIcon, CogIcon, ImportIcon, ExportIcon, TrashIcon } from './Icons';
 import Loader from './Loader';
+import { ActiveSimulation } from './DashboardPanel';
 
 interface ControlPanelProps {
     // State from parent
@@ -9,7 +10,7 @@ interface ControlPanelProps {
     attackType: string;
     attackDirectives: string;
     isLoading: boolean;
-    scenario: SimulationScenario | null;
+    scenario: ActiveSimulation | null;
 
     // Setters from parent
     setEnvironment: (value: string) => void;
@@ -59,7 +60,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
         const exportData: ExportedScenario = {
             userInput,
-            scenarioData: scenario,
+            scenarioData: scenario, // The ActiveSimulation object is compatible with SimulationScenario for export
             timestamp: new Date().toISOString()
         };
 
@@ -169,7 +170,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                         disabled={isLoading}
                         className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:scale-100"
                     >
-                        {isLoading ? (
+                        {isLoading && !scenario ? (
                             <>
                                 <Loader />
                                 <span>Generating...</span>

@@ -45,17 +45,18 @@ const jest = {
 
 // Mock dependencies
 // Mock the entire module
-const mockGenerateSimulationScenario = jest.fn();
-const mockGetMitreExplanation = jest.fn();
+// @FIX: Renamed mock to reflect the actual function name `startInitialSimulation`.
+const mockStartInitialSimulation = jest.fn();
 
+// @FIX: Updated mock to target `startInitialSimulation` and removed unused mock for `getMitreExplanation`.
 jest.mock('./aiService', () => ({
-    generateSimulationScenario: mockGenerateSimulationScenario,
-    getMitreExplanation: mockGetMitreExplanation,
+    startInitialSimulation: mockStartInitialSimulation,
 }));
 
 
 // Import the service to be tested
-import { generateSimulationScenario } from './aiService';
+// @FIX: Imported the correct function `startInitialSimulation` which is exported from aiService.ts.
+import { startInitialSimulation } from './aiService';
 
 
 const beforeEach = (fn: () => void) => { fn(); };
@@ -86,20 +87,22 @@ const expect = (actual: any) => ({
 
 
 // Test definitions
-it('should call generateSimulationScenario with correct parameters', async () => {
-    mockGenerateSimulationScenario.mockResolvedValue({ title: "Gemini Test" });
+// @FIX: Updated test to use `startInitialSimulation` instead of `generateSimulationScenario`.
+it('should call startInitialSimulation with correct parameters', async () => {
+    mockStartInitialSimulation.mockResolvedValue({ title: "Gemini Test" });
     // FIX: Added missing 'attackDirectives' argument to match the function signature.
-    await generateSimulationScenario('test env', 'Kerberoasting', '');
+    await startInitialSimulation('test env', 'Kerberoasting', '');
     // FIX: The custom mock function has `toHaveBeenCalledWith` directly on the mock, not on `expect`.
     // FIX: Added missing 'attackDirectives' argument to the mock assertion.
-    mockGenerateSimulationScenario.toHaveBeenCalledWith('test env', 'Kerberoasting', '');
+    mockStartInitialSimulation.toHaveBeenCalledWith('test env', 'Kerberoasting', '');
 });
 
+// @FIX: Updated test to use `startInitialSimulation` instead of `generateSimulationScenario`.
 it('should handle errors from the AI service gracefully', async () => {
-    mockGenerateSimulationScenario.mockRejectedValue(new Error("API Error"));
+    mockStartInitialSimulation.mockRejectedValue(new Error("API Error"));
     await expect(async () => {
         // FIX: Added missing 'attackDirectives' argument to match the function signature.
-        await generateSimulationScenario('test env', 'Kerberoasting', '');
+        await startInitialSimulation('test env', 'Kerberoasting', '');
     }).toThrow("API Error");
 });
 
@@ -109,8 +112,8 @@ it('should handle errors from the AI service gracefully', async () => {
 const originalFetch = window.fetch;
 beforeEach(() => {
     // Reset mocks before each test
-    mockGenerateSimulationScenario.mockClear();
-    mockGetMitreExplanation.mockClear();
+    // @FIX: Updated to clear the correct mock and removed unused mock clear.
+    mockStartInitialSimulation.mockClear();
     // FIX: Use `window.fetch` instead of `global.fetch` for browser environment.
     window.fetch = jest.fn() as any;
 });
